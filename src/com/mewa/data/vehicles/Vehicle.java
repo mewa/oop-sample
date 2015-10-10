@@ -2,7 +2,6 @@ package com.mewa.data.vehicles;
 
 import com.mewa.Main;
 import com.mewa.data.location.Location;
-import com.mewa.data.ports.AbstractPort;
 import com.mewa.data.ports.HasPort;
 import com.mewa.utils.i.Logger;
 
@@ -17,14 +16,14 @@ public abstract class Vehicle {
     private int mId = idGenerator.getAndIncrement();
     private Location mLocation;
 
-    public void arrive(HasPort port) {
-        Main.logger.log(Logger.VERBOSE, this + " is arriving to @ " + port.getPort());
-        port.getPort().receive(this);
+    public boolean arrive(HasPort port) {
+        Main.logger.log(Logger.VERBOSE, this + " is arriving @ " + port.getPort());
+        return port.getPort().receive(this);
     }
 
-    public void leave(HasPort port) {
+    public boolean leave(HasPort port) {
         Main.logger.log(Logger.VERBOSE, this + " is leaving @ " + port.getPort());
-        port.getPort().depart(this);
+        return port.getPort().depart(this);
     }
 
     @Override

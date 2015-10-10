@@ -1,12 +1,11 @@
 package com.mewa;
 
 import com.mewa.data.ports.AbstractPort;
-import com.mewa.data.ports.Airport;
-import com.mewa.data.ports.Port;
-import com.mewa.data.vehicles.Vehicle;
-import com.mewa.data.vehicles.planes.Plane;
+import com.mewa.data.ports.CivilPort;
+import com.mewa.data.ports.MilitaryAirport;
+import com.mewa.data.ports.MilitaryPort;
+import com.mewa.data.vehicles.planes.PassengerPlane;
 import com.mewa.data.vehicles.ships.AircraftCarrier;
-import com.mewa.data.vehicles.ships.Ship;
 import com.mewa.utils.SerialClock;
 import com.mewa.utils.StandardOutput;
 import com.mewa.utils.i.Logger;
@@ -19,11 +18,8 @@ public class Main {
     public static void main(String[] args) {
         logger.setLogLevel(Logger.VERBOSE);
 
-        AbstractPort port;
-        port = new Airport();
-        Vehicle vehicle;
-        vehicle = new AircraftCarrier();
-        vehicle.arrive(port);
-        new Plane().arrive(new AircraftCarrier());
+        AbstractPort port = new CivilPort();
+        System.out.print("canLand? " + new PassengerPlane(5).arrive(port));
+
     }
 }
