@@ -1,9 +1,6 @@
 package com.mewa;
 
-import com.mewa.data.ports.AbstractPort;
-import com.mewa.data.ports.CivilPort;
-import com.mewa.data.ports.MilitaryAirport;
-import com.mewa.data.ports.MilitaryPort;
+import com.mewa.data.ports.*;
 import com.mewa.data.vehicles.planes.PassengerPlane;
 import com.mewa.data.vehicles.ships.AircraftCarrier;
 import com.mewa.utils.SerialClock;
@@ -18,7 +15,7 @@ public class Main {
     public static void main(String[] args) {
         logger.setLogLevel(Logger.VERBOSE);
 
-        AbstractPort port = new CivilPort();
+        AbstractPort port = new CivilNavalPort();
         System.out.print("canLand? " + new PassengerPlane(5).arrive(port));
 
     }

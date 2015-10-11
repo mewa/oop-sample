@@ -17,12 +17,12 @@ public abstract class Vehicle {
     private Location mLocation;
 
     public boolean arrive(HasPort port) {
-        Main.logger.log(Logger.VERBOSE, this + " is arriving @ " + port.getPort());
+        Main.logger.log(Logger.VERBOSE, this + " is arriving at " + port.getPort());
         return port.getPort().receive(this);
     }
 
     public boolean leave(HasPort port) {
-        Main.logger.log(Logger.VERBOSE, this + " is leaving @ " + port.getPort());
+        Main.logger.log(Logger.VERBOSE, this + " is leaving at " + port.getPort());
         return port.getPort().depart(this);
     }
 

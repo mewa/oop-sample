@@ -15,13 +15,13 @@ public abstract class AbstractPort implements HasPort {
     private int mId = idGenerator.getAndIncrement();
 
     public boolean receive(Vehicle vehicle) {
-        Main.logger.log(Logger.ERROR, this + " denied " + vehicle);
-        return false;
+        Main.logger.log(Logger.ERROR, vehicle + " arrived at " + this);
+        return true;
     }
 
     public boolean depart(Vehicle vehicle) {
-        Main.logger.log(Logger.ERROR, this + " disallowed " + vehicle + "'s departure");
-        return false;
+        Main.logger.log(Logger.ERROR, vehicle + " departed from " + this);
+        return true;
     }
 
     @Override
