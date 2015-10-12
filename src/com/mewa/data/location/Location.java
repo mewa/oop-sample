@@ -1,9 +1,12 @@
 package com.mewa.data.location;
 
+import com.mewa.Main;
+import com.mewa.utils.i.Logger;
+
 /**
  * Created by Mewa on 2015-10-10.
  */
-public class Location {
+public class Location implements Comparable<Location> {
     private int mX;
     private int mY;
 
@@ -36,5 +39,13 @@ public class Location {
     @Override
     public String toString() {
         return String.format("[Location: %d,%d]", getX(), getY());
+    }
+
+    @Override
+    public int compareTo(Location o) {
+        int cmp = Integer.compare(getX(), o.getX());
+        if (cmp != 0)
+            return cmp;
+        return Integer.compare(getY(), o.getY());
     }
 }

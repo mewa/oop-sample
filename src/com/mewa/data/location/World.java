@@ -4,7 +4,6 @@ import com.mewa.Main;
 import com.mewa.data.ports.*;
 import com.mewa.data.vehicles.Vehicle;
 import com.mewa.utils.i.Logger;
-import com.sun.deploy.uitoolkit.impl.awt.AWTGrayBoxPainter;
 
 import java.util.*;
 import java.util.concurrent.Semaphore;
@@ -14,8 +13,8 @@ import java.util.concurrent.Semaphore;
  */
 public class World {
     private static World instance;
-    private static final int kWidth = 100;
-    private static final int kHeight = 100;
+    private static final int kWidth = 50;
+    private static final int kHeight = 50;
 
     private static final Semaphore mWorldLock = new Semaphore(1);
 
@@ -72,7 +71,7 @@ public class World {
     private static Location randomUnoccupiedLocation(World world) {
         Location location;
         do {
-            location = getInstance().translateLocation(new Location(
+            location = world.translateLocation(new Location(
                     (int) (Math.random() * kWidth),
                     (int) (Math.random() * kHeight)
             ));
@@ -81,13 +80,11 @@ public class World {
     }
 
     private Location translateLocation(Location location) {
-        location.setX(getOrigin().getX() + location.getX());
-        location.setY(getOrigin().getY() + location.getY());
         return location;
     }
 
     private void generateLocations() {
-        mOccupiedMap = Collections.synchronizedMap(new HashMap<Location, List<Vehicle>>());
+        mOccupiedMap = Collections.synchronizedMap(new TreeMap<Location, List<Vehicle>>());
         mLocations = new Location[kWidth][kHeight];
         for (int i = 0; i < mLocations.length; ++i) {
             for (int j = 0; j < mLocations[i].length; ++j) {
@@ -95,6 +92,7 @@ public class World {
                 mOccupiedMap.put(mLocations[i][j], Collections.synchronizedList(new ArrayList<Vehicle>()));
             }
         }
+        Main.logger.log(Logger.VERBOSE, "" + mOccupiedMap);
     }
 
     public static World getInstance() {

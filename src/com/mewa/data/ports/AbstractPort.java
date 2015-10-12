@@ -20,23 +20,10 @@ public abstract class AbstractPort implements HasPort {
 
     private final List<Vehicle> vehicles = Collections.synchronizedList(new ArrayList<Vehicle>());
 
-    private final Thread runner;
     private Location mLocation;
 
     AbstractPort() {
-        runner = new Thread() {
-            @Override
-            public void run() {
-                while (true) {
-                    try {
-                        sleep(2000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        };
-        runner.start();
+
     }
 
     public boolean receive(Vehicle vehicle) {

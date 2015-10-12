@@ -9,7 +9,7 @@ import com.mewa.data.vehicles.Vehicle;
 public class Ship extends Vehicle implements Waterborne {
     private double mMaxVelocity;
 
-
+    @Override
     public double getMaxVelocity() {
         return mMaxVelocity;
     }

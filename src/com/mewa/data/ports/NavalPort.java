@@ -1,7 +1,6 @@
 package com.mewa.data.ports;
 
 import com.mewa.Main;
-import com.mewa.data.type.Airborne;
 import com.mewa.data.type.Waterborne;
 import com.mewa.data.vehicles.Vehicle;
 import com.mewa.utils.i.Logger;

@@ -7,12 +7,12 @@ import com.mewa.data.vehicles.Vehicle;
 /**
  * Created by Mewa on 2015-10-10.
  */
-public class Plane extends Vehicle implements Airborne {
+public abstract class Plane extends Vehicle implements Airborne {
     private double mFuel;
 
     @Override
     public double getFuel() {
-        return 0;
+        return mFuel;
     }
 
     @Override

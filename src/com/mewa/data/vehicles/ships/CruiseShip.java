@@ -1,12 +1,23 @@
 package com.mewa.data.vehicles.ships;
 
+import com.mewa.data.passengers.Passenger;
 import com.mewa.data.type.Civil;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by Mewa on 2015-10-10.
  */
 public class CruiseShip extends Ship implements Civil {
     private int mCapacity;
+
+    private final List<Passenger> mPassengers = Collections.synchronizedList(new ArrayList<Passenger>());
+
+    public CruiseShip(int capacity) {
+        mCapacity = capacity;
+    }
 
     @Override
     public int getCapacity() {
@@ -15,6 +26,19 @@ public class CruiseShip extends Ship implements Civil {
 
     @Override
     public int getNumberOfPassengers() {
-        return 0;
+        return mPassengers.size();
+    }
+
+    @Override
+    public synchronized boolean board(Passenger passenger) {
+        if (canBoard()) {
+            mPassengers.add(passenger);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean canBoard() {
+        return mPassengers.size() < getCapacity();
     }
 }

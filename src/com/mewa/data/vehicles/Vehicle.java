@@ -2,9 +2,13 @@ package com.mewa.data.vehicles;
 
 import com.mewa.Main;
 import com.mewa.data.location.Location;
+import com.mewa.data.passengers.Passenger;
 import com.mewa.data.ports.HasPort;
 import com.mewa.utils.i.Logger;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -33,5 +37,13 @@ public abstract class Vehicle {
 
     public int getId() {
         return mId;
+    }
+
+    public Location getLocation() {
+        return mLocation;
+    }
+
+    public void setLocation(Location location) {
+        this.mLocation = location;
     }
 }
