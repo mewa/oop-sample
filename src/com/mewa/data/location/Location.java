@@ -4,32 +4,37 @@ package com.mewa.data.location;
  * Created by Mewa on 2015-10-10.
  */
 public class Location {
-    private double mX;
-    private double mY;
+    private int mX;
+    private int mY;
 
     public Location() {
 
     }
 
-    public Location(double x, double y) {
+    public Location(int x, int y) {
         setX(x);
         setY(y);
     }
 
 
-    public double getX() {
+    public int getX() {
         return mX;
     }
 
-    public void setX(double x) {
+    public void setX(int x) {
         this.mX = x;
     }
 
-    public double getY() {
+    public int getY() {
         return mY;
     }
 
-    public void setY(double y) {
+    public void setY(int y) {
         this.mY = y;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("[Location: %d,%d]", getX(), getY());
     }
 }

@@ -1,9 +1,13 @@
 package com.mewa.data.ports;
 
 import com.mewa.Main;
+import com.mewa.data.location.Location;
 import com.mewa.data.vehicles.Vehicle;
 import com.mewa.utils.i.Logger;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -14,12 +18,39 @@ public abstract class AbstractPort implements HasPort {
 
     private int mId = idGenerator.getAndIncrement();
 
+    private final List<Vehicle> vehicles = Collections.synchronizedList(new ArrayList<Vehicle>());
+
+    private final Thread runner;
+    private Location mLocation;
+
+    AbstractPort() {
+        runner = new Thread() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        sleep(2000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+        runner.start();
+    }
+
     public boolean receive(Vehicle vehicle) {
+        synchronized (vehicles) {
+            vehicles.add(vehicle);
+        }
         Main.logger.log(Logger.ERROR, vehicle + " arrived at " + this);
         return true;
     }
 
     public boolean depart(Vehicle vehicle) {
+        synchronized (vehicles) {
+            vehicles.remove(vehicle);
+        }
         Main.logger.log(Logger.ERROR, vehicle + " departed from " + this);
         return true;
     }
@@ -38,4 +69,8 @@ public abstract class AbstractPort implements HasPort {
         return mId;
     }
 
+    public void setLocation(Location location) {
+        this.mLocation = location;
+        Main.logger.log(Logger.VERBOSE, this + " @ " + mLocation);
+    }
 }
