@@ -2,6 +2,7 @@ package com.mewa.data.vehicles;
 
 import com.mewa.Main;
 import com.mewa.data.location.Location;
+import com.mewa.data.location.Route;
 import com.mewa.data.passengers.Passenger;
 import com.mewa.data.ports.HasPort;
 import com.mewa.utils.i.Logger;
@@ -19,6 +20,7 @@ public abstract class Vehicle {
 
     private int mId = idGenerator.getAndIncrement();
     private Location mLocation;
+    private Route mRoute;
 
     public boolean arrive(HasPort port) {
         Main.logger.log(Logger.VERBOSE, this + " is arriving at " + port.getPort());
@@ -45,5 +47,13 @@ public abstract class Vehicle {
 
     public void setLocation(Location location) {
         this.mLocation = location;
+    }
+
+    public Route getRoute() {
+        return mRoute;
+    }
+
+    public void setRoute(Route route) {
+        this.mRoute = route;
     }
 }
