@@ -1,18 +1,25 @@
 package com.mewa;
 
-import com.mewa.data.location.World;
-import com.mewa.utils.SerialClock;
-import com.mewa.utils.StandardOutput;
+import com.mewa.ui.controllers.GUIMain;
 import com.mewa.utils.i.Logger;
-import com.mewa.utils.loggers.DebugLogger;
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
-public class Main {
+public class Main extends Application {
 
-    public static Logger logger = new DebugLogger(new StandardOutput(), new SerialClock());
+    public static Logger logger = GUIMain.logger;
 
     public static void main(String[] args) {
-        logger.setLogLevel(Logger.VERBOSE);
-
-        World.getInstance();
+        launch(args);
     }
+
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        primaryStage.setResizable(false);
+        new GUIMain().start(primaryStage);
+    }
+
 }

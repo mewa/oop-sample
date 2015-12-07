@@ -2,11 +2,12 @@ package com.mewa.data.vehicles.ships;
 
 import com.mewa.data.type.Waterborne;
 import com.mewa.data.vehicles.Vehicle;
+import javafx.scene.canvas.GraphicsContext;
 
 /**
  * Created by Mewa on 2015-10-10.
  */
-public class Ship extends Vehicle implements Waterborne {
+public abstract class Ship extends Vehicle implements Waterborne {
     private double mMaxVelocity;
 
     @Override

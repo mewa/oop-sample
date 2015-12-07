@@ -5,6 +5,7 @@ import com.mewa.data.location.Location;
 import com.mewa.data.location.Route;
 import com.mewa.data.passengers.Passenger;
 import com.mewa.data.ports.HasPort;
+import com.mewa.ui.Drawable;
 import com.mewa.utils.i.Logger;
 
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by Mewa on 2015-10-10.
  */
-public abstract class Vehicle {
+public abstract class Vehicle implements Drawable {
     private static AtomicInteger idGenerator = new AtomicInteger();
 
     private int mId = idGenerator.getAndIncrement();

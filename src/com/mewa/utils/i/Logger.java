@@ -7,7 +7,7 @@ public interface Logger {
 	public static final int WARN = 0xBADBEEF;
 	public static final int ERROR = 0xD00D505;
 	
-	public void log(int level, String msg);
+	public void log(int level, String fmt, Object... msgs);
 	public void write(String msg);
 	public void setLogLevel(int level);
 }

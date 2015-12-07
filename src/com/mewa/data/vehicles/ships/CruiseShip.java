@@ -2,6 +2,11 @@ package com.mewa.data.vehicles.ships;
 
 import com.mewa.data.passengers.Passenger;
 import com.mewa.data.type.Civil;
+import com.mewa.ui.controllers.GUIMain;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,5 +45,17 @@ public class CruiseShip extends Ship implements Civil {
 
     private boolean canBoard() {
         return mPassengers.size() < getCapacity();
+    }
+
+    @Override
+    public void draw(GraphicsContext gc) {
+        gc.setFill(Color.DARKSEAGREEN);
+        gc.setFont(Font.font("sans-serif", FontWeight.BOLD, 14));
+        gc.fillText(
+                "AC",
+                getLocation().getX() * GUIMain.CELL_SIZE,
+                getLocation().getY() * GUIMain.CELL_SIZE,
+                GUIMain.CELL_SIZE
+        );
     }
 }

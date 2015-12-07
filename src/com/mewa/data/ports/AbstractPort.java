@@ -3,7 +3,11 @@ package com.mewa.data.ports;
 import com.mewa.Main;
 import com.mewa.data.location.Location;
 import com.mewa.data.vehicles.Vehicle;
+import com.mewa.ui.Drawable;
+import com.mewa.ui.controllers.GUIMain;
 import com.mewa.utils.i.Logger;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,7 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by Mewa on 2015-10-10.
  */
-public abstract class AbstractPort implements HasPort {
+public abstract class AbstractPort implements HasPort, Drawable {
     private static AtomicInteger idGenerator = new AtomicInteger();
 
     private int mId = idGenerator.getAndIncrement();
@@ -60,4 +64,9 @@ public abstract class AbstractPort implements HasPort {
         this.mLocation = location;
         Main.logger.log(Logger.VERBOSE, this + " @ " + mLocation);
     }
+
+    public Location getLocation() {
+        return mLocation;
+    }
+
 }
