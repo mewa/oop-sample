@@ -7,6 +7,7 @@ import com.mewa.data.vehicles.planes.PassengerPlane;
 import com.mewa.data.vehicles.ships.AircraftCarrier;
 import com.mewa.data.vehicles.ships.CruiseShip;
 import com.mewa.utils.i.Logger;
+import javafx.application.Platform;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
@@ -18,8 +19,8 @@ import java.util.concurrent.Semaphore;
  */
 public class World {
     private static World instance;
-    private static final int kWidth = 25;
-    private static final int kHeight = 25;
+    private static final int kWidth = 20;
+    private static final int kHeight = 20;
 
     private static final Semaphore mWorldLock = new Semaphore(1);
 
@@ -32,13 +33,17 @@ public class World {
     private Location mNortheast = new Location(getOrigin().getX(), getOrigin().getY());
 
     private List<AbstractPort> mPorts = Collections.synchronizedList(new ArrayList<AbstractPort>());
-    private int mNumAirports = 0;
-    private int mNumPorts = 0;
     private int mNumVehicles = 0;
 
     private boolean run = true;
+    private final List<AbstractPort> mMilitaryAirports = Collections.synchronizedList(new ArrayList<AbstractPort>());
+    private final List<AbstractPort> mMilitaryNavalPorts = Collections.synchronizedList(new ArrayList<AbstractPort>());
+    private final List<AbstractPort> mCivilAirports = Collections.synchronizedList(new ArrayList<AbstractPort>());
+    private final List<AbstractPort> mCivilNavalPorts = Collections.synchronizedList(new ArrayList<AbstractPort>());
+    private final List<Route> mRoutes = Collections.synchronizedList(new ArrayList<Route>());
+    private final List<Location> mCrossings = Collections.synchronizedList(new ArrayList<Location>());
 
-    World() {
+    private World() {
         create();
     }
 
@@ -52,28 +57,50 @@ public class World {
         );
         generateLocations();
         spawnPorts();
-        spawnVehicles();
+        //spawnVehicles();
+        spawnRoutes(mMilitaryAirports);
+        spawnRoutes(mMilitaryNavalPorts);
+        spawnRoutes(mCivilNavalPorts);
+        spawnRoutes(mCivilAirports);
+    }
+
+    private void spawnRoutes(List<AbstractPort> ports) {
+        for (int i = 0; i < ports.size(); ++i) {
+            for (int j = 1; j < ports.size(); ++j) {
+                if (i == j || Math.random() > 0.1)
+                    continue;
+                Route route = new Route();
+                makeRoute(route, ports.get(i).getLocation(), ports.get(j).getLocation());
+                mRoutes.add(route);
+            }
+        }
+    }
+
+    private void makeRoute(Route route, Location location1, Location location2) {
+        route.getStops().add(location1);
+        route.getStops().add(location1.closest(mCrossings));
+        route.getStops().add(location2);
     }
 
     private void spawnPorts() {
-        while (mNumAirports < 10 || mNumPorts < 5) {
+        while (mMilitaryAirports.size() + mCivilAirports.size() < 10 || mCivilNavalPorts.size() + mMilitaryNavalPorts.size() < 5) {
             AbstractPort port;
             switch ((int) (Math.random() * 4)) {
                 case 0:
                     port = new MilitaryAirport();
-                    mNumAirports++;
+                    mMilitaryAirports.add(port);
                     break;
                 case 1:
                     port = new MilitaryNavalPort();
-                    mNumPorts++;
+                    mMilitaryNavalPorts.add(port);
                     break;
                 case 2:
                     port = new CivilNavalPort();
-                    mNumAirports++;
+                    mCivilNavalPorts.add(port);
                     break;
                 default:
                     port = new CivilAirport();
-                    mNumPorts++;
+                    mCivilAirports.add(port);
                     break;
             }
             port.setLocation(
@@ -97,7 +124,7 @@ public class World {
                     vehicle = new PassengerPlane((int) (Math.random() * 200));
                     break;
             }
-            vehicle.setLocation(World.randomUnoccupiedLocation(this));
+            vehicle.moveTo(World.randomUnoccupiedLocation(this));
             mOccupiedMap.get(vehicle.getLocation()).add(vehicle);
             mNumVehicles++;
         }
@@ -106,10 +133,7 @@ public class World {
     private static Location randomUnoccupiedLocation(World world) {
         Location location;
         do {
-            location = world.translateLocation(new Location(
-                    (int) (Math.random() * kWidth),
-                    (int) (Math.random() * kHeight)
-            ));
+            location = world.mLocations[(int) (Math.random() * kWidth)][(int) (Math.random() * kHeight)];
         } while (world.getVehiclesAtLocation(location).size() > 0);
         return location;
     }
@@ -123,7 +147,16 @@ public class World {
         mLocations = new Location[kWidth][kHeight];
         for (int i = 0; i < mLocations.length; ++i) {
             for (int j = 0; j < mLocations[i].length; ++j) {
-                mLocations[i][j] = new Location(i, j);
+                if (mCrossings.size() < 0.05 * kWidth * kHeight) {
+                    if (Math.random() < 0.01) {
+                        mLocations[i][j] = new Crossing(i, j);
+                        mCrossings.add(mLocations[i][j]);
+                    } else {
+                        mLocations[i][j] = new Location(i, j);
+                    }
+                } else {
+                    mLocations[i][j] = new Location(i, j);
+                }
                 mOccupiedMap.put(mLocations[i][j], Collections.synchronizedList(new ArrayList<Vehicle>()));
             }
         }
@@ -168,7 +201,38 @@ public class World {
         return mPorts;
     }
 
-    public void start(final GraphicsContext gc, final double width, final double height, final double cellSize) {
+    public void start(final GraphicsContext worldGC, final GraphicsContext objectGC, final double width, final double height, final double cellSize) {
+        worldGC.setFill(Color.WHEAT);
+        worldGC.fillRect(0, 0, width, height);
+
+        worldGC.setStroke(Color.LIGHTGRAY);
+        for (int i = 0; i < width; i += cellSize) {
+            worldGC.beginPath();
+            worldGC.moveTo(i, 0);
+            worldGC.lineTo(i, height);
+            worldGC.stroke();
+            for (int j = 0; j < height; j += cellSize) {
+                worldGC.beginPath();
+                worldGC.moveTo(0, j);
+                worldGC.lineTo(width, j);
+                worldGC.stroke();
+            }
+        }
+        for (AbstractPort port : getPorts()) {
+            port.draw(worldGC);
+        }
+
+        for (Route route : mRoutes) {
+            route.draw(objectGC);
+        }
+
+        for (Location[] locations : mLocations) {
+            for (Location location : locations) {
+                location.draw(objectGC);
+            }
+        }
+
+        objectGC.setFill(Color.TRANSPARENT);
         Thread thread = new Thread() {
 
             final double fps = 15;
@@ -183,35 +247,19 @@ public class World {
                 if (!limit)
                     lastTime = time;
                 return limit;
-
             }
 
             @Override
             public void run() {
                 while (run) {
-                    gc.setFill(Color.WHEAT);
-                    gc.fillRect(0, 0, width, height);
-
-                    gc.setStroke(Color.LIGHTGRAY);
-                    for (int i = 0; i < width; i += cellSize) {
-                        gc.beginPath();
-                        gc.moveTo(i, 0);
-                        gc.lineTo(i, height);
-                        gc.stroke();
-                        for (int j = 0; j < height; j += cellSize) {
-                            gc.beginPath();
-                            gc.moveTo(0, j);
-                            gc.lineTo(width, j);
-                            gc.stroke();
-                        }
-                    }
-                    for (AbstractPort port : getPorts()) {
-                        port.draw(gc);
-                    }
-                    Main.logger.log(Logger.VERBOSE, "VEHICLES COUNT: %d", mOccupiedMap.size());
                     for (List<Vehicle> vehicles : mOccupiedMap.values()) {
-                        for (Vehicle vehicle : vehicles) {
-                            vehicle.draw(gc);
+                        for (final Vehicle vehicle : vehicles) {
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    vehicle.draw(objectGC);
+                                }
+                            });
                         }
                     }
                     try {

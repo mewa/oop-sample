@@ -13,14 +13,11 @@ import javafx.scene.paint.Color;
  * Created by Mewa on 2015-10-12.
  */
 public class Airport extends AbstractPort {
-    @Override
-    public boolean receive(Vehicle vehicle) {
-        if (vehicle instanceof Airborne) {
-            return super.receive(vehicle);
-        } else {
-            Main.logger.log(Logger.VERBOSE, String.format("%s denied %s: only aircrafts are permitted", this, vehicle));
-            return false;
-        }
+
+    private final int capacity;
+
+    public Airport(int capacity) {
+        this.capacity = capacity;
     }
 
     @Override
@@ -31,5 +28,9 @@ public class Airport extends AbstractPort {
                 getLocation().getY() * GUIMain.CELL_SIZE + inset * GUIMain.CELL_SIZE,
                 (1 - 2 * inset) * GUIMain.CELL_SIZE,
                 (1 - 2 * inset) * GUIMain.CELL_SIZE);
+    }
+
+    public int getCapacity() {
+        return capacity;
     }
 }

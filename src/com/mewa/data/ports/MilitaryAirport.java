@@ -13,6 +13,10 @@ import javafx.scene.paint.Color;
  * Created by Mewa on 2015-10-12.
  */
 public class MilitaryAirport extends Airport {
+    public MilitaryAirport() {
+        super((int) (Math.random() * 10 + 1));
+    }
+
     @Override
     public boolean receive(Vehicle vehicle) {
         if (vehicle instanceof Military) {

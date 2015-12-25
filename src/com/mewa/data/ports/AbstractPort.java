@@ -1,13 +1,12 @@
 package com.mewa.data.ports;
 
 import com.mewa.Main;
+import com.mewa.data.GameObject;
 import com.mewa.data.location.Location;
 import com.mewa.data.vehicles.Vehicle;
 import com.mewa.ui.Drawable;
 import com.mewa.ui.controllers.GUIMain;
 import com.mewa.utils.i.Logger;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by Mewa on 2015-10-10.
  */
-public abstract class AbstractPort implements HasPort, Drawable {
+public abstract class AbstractPort extends GameObject implements HasPort, Drawable {
     private static AtomicInteger idGenerator = new AtomicInteger();
 
     private int mId = idGenerator.getAndIncrement();
@@ -30,7 +29,7 @@ public abstract class AbstractPort implements HasPort, Drawable {
 
     }
 
-    public boolean receive(Vehicle vehicle) {
+    protected boolean receive(Vehicle vehicle) {
         synchronized (vehicles) {
             vehicles.add(vehicle);
         }
@@ -38,7 +37,7 @@ public abstract class AbstractPort implements HasPort, Drawable {
         return true;
     }
 
-    public boolean depart(Vehicle vehicle) {
+    protected boolean depart(Vehicle vehicle) {
         synchronized (vehicles) {
             vehicles.remove(vehicle);
         }
@@ -69,4 +68,8 @@ public abstract class AbstractPort implements HasPort, Drawable {
         return mLocation;
     }
 
+    @Override
+    public void onClick(GUIMain guiMain) {
+        guiMain.showPortPanel(this);
+    }
 }

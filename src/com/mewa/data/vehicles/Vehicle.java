@@ -1,37 +1,61 @@
 package com.mewa.data.vehicles;
 
 import com.mewa.Main;
+import com.mewa.data.GameObject;
 import com.mewa.data.location.Location;
 import com.mewa.data.location.Route;
-import com.mewa.data.passengers.Passenger;
 import com.mewa.data.ports.HasPort;
 import com.mewa.ui.Drawable;
+import com.mewa.ui.controllers.GUIMain;
 import com.mewa.utils.i.Logger;
+import com.sun.javafx.geom.Vec2d;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by Mewa on 2015-10-10.
  */
-public abstract class Vehicle implements Drawable {
+public abstract class Vehicle extends GameObject implements Drawable {
     private static AtomicInteger idGenerator = new AtomicInteger();
 
     private int mId = idGenerator.getAndIncrement();
     private Location mLocation;
     private Route mRoute;
+    private Thread mVehicleThread;
+    private int mLocationsTraversed = 0;
 
-    public boolean arrive(HasPort port) {
-        Main.logger.log(Logger.VERBOSE, this + " is arriving at " + port.getPort());
-        return port.getPort().receive(this);
+    public Vehicle() {
+        this(null);
     }
 
-    public boolean leave(HasPort port) {
-        Main.logger.log(Logger.VERBOSE, this + " is leaving at " + port.getPort());
-        return port.getPort().depart(this);
+    public Vehicle(Route route) {
+        mRoute = route;
+        mVehicleThread = new Thread("vehicle-thread-" + this) {
+            @Override
+            public void run() {
+                super.run();
+                if (mRoute != null) {
+                    synchronized (mRoute) {
+                        // travel
+                        if (++mLocationsTraversed < mRoute.getStops().size()) {
+                            Location nextLocation = mRoute.getStops().get(mLocationsTraversed);
+                            travelTo(nextLocation);
+                        }
+
+                    }
+                }
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        mVehicleThread.setDaemon(true);
+        mVehicleThread.start();
     }
+
+    protected abstract void travelTo(Location nextLocation);
 
     @Override
     public String toString() {
@@ -46,8 +70,16 @@ public abstract class Vehicle implements Drawable {
         return mLocation;
     }
 
-    public void setLocation(Location location) {
+    public void moveTo(Location location) {
+        location.onVehicleArriving(this);
+        if (mLocation != null)
+            mLocation.onVehicleLeaving(this);
         this.mLocation = location;
+    }
+
+    @Override
+    public void onClick(GUIMain guiMain) {
+
     }
 
     public Route getRoute() {
@@ -55,6 +87,8 @@ public abstract class Vehicle implements Drawable {
     }
 
     public void setRoute(Route route) {
-        this.mRoute = route;
+        synchronized (mRoute) {
+            this.mRoute = route;
+        }
     }
 }

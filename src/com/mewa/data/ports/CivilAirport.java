@@ -3,6 +3,7 @@ package com.mewa.data.ports;
 import com.mewa.Main;
 import com.mewa.data.type.Civil;
 import com.mewa.data.vehicles.Vehicle;
+import com.mewa.data.vehicles.planes.Plane;
 import com.mewa.ui.Drawable;
 import com.mewa.ui.controllers.GUIMain;
 import com.mewa.utils.i.Logger;
@@ -13,14 +14,16 @@ import javafx.scene.paint.Color;
  * Created by Mewa on 2015-10-12.
  */
 public class CivilAirport extends Airport {
-    @Override
-    public boolean receive(Vehicle vehicle) {
-        if (vehicle instanceof Civil) {
-            return super.receive(vehicle);
-        } else {
-            Main.logger.log(Logger.VERBOSE, String.format("%s denied %s: only civil vehicles are permitted", this, vehicle));
-            return false;
-        }
+    public CivilAirport() {
+        super((int) (Math.random() * 10 + 1));
+    }
+
+    public <T extends Plane & Civil> void acceptArrival(T civilPlane) {
+        receive(civilPlane);
+    }
+
+    public <T extends Plane & Civil> void acceptDeparture(T civilPlane) {
+        depart(civilPlane);
     }
 
     @Override

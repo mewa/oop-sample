@@ -21,6 +21,7 @@ public class PassengerPlane extends Plane implements Civil {
     private final List<Passenger> mPassengers = Collections.synchronizedList(new ArrayList<Passenger>());
 
     public PassengerPlane(int capacity) {
+        super();
         mCapacity = capacity;
     }
 

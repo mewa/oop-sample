@@ -7,5 +7,6 @@ import com.mewa.data.ports.AbstractPort;
  */
 public interface Airborne {
     double getFuel();
+    double getSpeed();
     AbstractPort getNextPort();
 }

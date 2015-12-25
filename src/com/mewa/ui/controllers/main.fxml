@@ -9,5 +9,6 @@
 <?import javafx.scene.canvas.Canvas?>
 <AnchorPane fx:id="root" xmlns:fx="http://javafx.com/fxml/1"
             xmlns="http://javafx.com/javafx/2.2">
-    <Canvas onMouseClicked="#click" fx:id="canvas"/>
+    <Canvas fx:id="worldCanvas"/>
+    <Canvas fx:id="vehicleCanvas" onMouseClicked="#vehicleClicked"/>
 </AnchorPane>

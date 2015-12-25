@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+
+<TitledPane fx:id="root" animated="false" prefHeight="100.0" text="port" xmlns:fx="http://javafx.com/fxml/1"
+            xmlns="http://javafx.com/javafx/2.2" fx:controller="com.mewa.ui.controllers.InfoPane">
+    <content>
+        <AnchorPane prefHeight="200.0" prefWidth="200.0">
+            <children>
+                <VBox fx:id="main" layoutX="0.0" layoutY="0.0">
+                    <HBox prefHeight="100.0" prefWidth="200.0">
+                        <children>
+                            <VBox fx:id="properties" prefHeight="200.0" prefWidth="100.0">
+
+                            </VBox>
+                            <VBox fx:id="values" prefHeight="200.0" prefWidth="100.0">
+
+                            </VBox>
+                        </children>
+                    </HBox>
+                </VBox>
+            </children>
+        </AnchorPane>
+    </content>
+</TitledPane>
