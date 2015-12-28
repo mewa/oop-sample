@@ -1,11 +1,13 @@
 package com.mewa.data.location;
 
 import com.mewa.Main;
+import com.mewa.data.GameObject;
 import com.mewa.data.ports.*;
 import com.mewa.data.vehicles.Vehicle;
 import com.mewa.data.vehicles.planes.PassengerPlane;
 import com.mewa.data.vehicles.ships.AircraftCarrier;
 import com.mewa.data.vehicles.ships.CruiseShip;
+import com.mewa.ui.Drawable;
 import com.mewa.utils.i.Logger;
 import javafx.application.Platform;
 import javafx.scene.canvas.GraphicsContext;
@@ -19,23 +21,21 @@ import java.util.concurrent.Semaphore;
  */
 public class World {
     private static World instance;
-    private static final int kWidth = 20;
-    private static final int kHeight = 20;
+    private static final int kWidth = 15;
+    private static final int kHeight = 15;
 
     private static final Semaphore mWorldLock = new Semaphore(1);
 
     private final Location mOrigin = new Location(0, 0);
 
-    private Location[][] mLocations;
-    private Map<Location, List<Vehicle>> mOccupiedMap;
-
-    private Location mSouthwest = new Location(kWidth + getOrigin().getX(), kHeight + getOrigin().getY());
-    private Location mNortheast = new Location(getOrigin().getX(), getOrigin().getY());
+    private Location mSouthwest = new Location(getOrigin().getX(), getOrigin().getY());
+    private Location mNortheast = new Location(kWidth + getOrigin().getX(), kHeight + getOrigin().getY());
 
     private List<AbstractPort> mPorts = Collections.synchronizedList(new ArrayList<AbstractPort>());
     private int mNumVehicles = 0;
 
     private boolean run = true;
+    private final List<GameObject> mGameObjects = Collections.synchronizedList(new ArrayList<GameObject>());
     private final List<AbstractPort> mMilitaryAirports = Collections.synchronizedList(new ArrayList<AbstractPort>());
     private final List<AbstractPort> mMilitaryNavalPorts = Collections.synchronizedList(new ArrayList<AbstractPort>());
     private final List<AbstractPort> mCivilAirports = Collections.synchronizedList(new ArrayList<AbstractPort>());
@@ -55,7 +55,6 @@ public class World {
                         Math.abs(2 * kWidth), Math.abs(2 * kHeight)
                 )
         );
-        generateLocations();
         spawnPorts();
         //spawnVehicles();
         spawnRoutes(mMilitaryAirports);
@@ -78,7 +77,7 @@ public class World {
 
     private void makeRoute(Route route, Location location1, Location location2) {
         route.getStops().add(location1);
-        route.getStops().add(location1.closest(mCrossings));
+        //route.getStops().add(location1.closest(mCrossings));
         route.getStops().add(location2);
     }
 
@@ -103,9 +102,7 @@ public class World {
                     mCivilAirports.add(port);
                     break;
             }
-            port.setLocation(
-                    World.randomUnoccupiedLocation(this)
-            );
+            World.spawnAtRandomLocation(this, port);
             getPorts().add(port);
         }
     }
@@ -124,43 +121,40 @@ public class World {
                     vehicle = new PassengerPlane((int) (Math.random() * 200));
                     break;
             }
-            vehicle.moveTo(World.randomUnoccupiedLocation(this));
-            mOccupiedMap.get(vehicle.getLocation()).add(vehicle);
+            World.spawnAtRandomLocation(this, vehicle);
             mNumVehicles++;
         }
     }
 
-    private static Location randomUnoccupiedLocation(World world) {
-        Location location;
-        do {
-            location = world.mLocations[(int) (Math.random() * kWidth)][(int) (Math.random() * kHeight)];
-        } while (world.getVehiclesAtLocation(location).size() > 0);
-        return location;
+    private static void spawnAtRandomLocation(World world, GameObject gameObject) {
+        Location location = new Location();
+        gameObject.setLocation(location);
+        boolean found = false;
+        while (!found) {
+            double x = Math.random() * (world.mNortheast.getX() - world.mSouthwest.getX());
+            double y = Math.random() * (world.mNortheast.getY() - world.mSouthwest.getY());
+            location.setX(x);
+            location.setY(y);
+            found = !world.checkCollision(gameObject);
+        }
+        world.registerGameObject(gameObject);
+        Main.logger.log(Logger.VERBOSE, "Spawning " + gameObject + " @ " + gameObject.getLocation());
+    }
+
+    private boolean checkCollision(GameObject gameObject1) {
+        synchronized (mGameObjects) {
+            for (GameObject gameObject2 : mGameObjects) {
+                if (gameObject1 != gameObject2) {
+                    if (gameObject1.getLocation().compareTo(gameObject2.getLocation()) == 0)
+                        return true;
+                }
+            }
+        }
+        return false;
     }
 
     private Location translateLocation(Location location) {
         return location;
-    }
-
-    private void generateLocations() {
-        mOccupiedMap = Collections.synchronizedMap(new TreeMap<Location, List<Vehicle>>());
-        mLocations = new Location[kWidth][kHeight];
-        for (int i = 0; i < mLocations.length; ++i) {
-            for (int j = 0; j < mLocations[i].length; ++j) {
-                if (mCrossings.size() < 0.05 * kWidth * kHeight) {
-                    if (Math.random() < 0.01) {
-                        mLocations[i][j] = new Crossing(i, j);
-                        mCrossings.add(mLocations[i][j]);
-                    } else {
-                        mLocations[i][j] = new Location(i, j);
-                    }
-                } else {
-                    mLocations[i][j] = new Location(i, j);
-                }
-                mOccupiedMap.put(mLocations[i][j], Collections.synchronizedList(new ArrayList<Vehicle>()));
-            }
-        }
-        Main.logger.log(Logger.VERBOSE, "" + mOccupiedMap);
     }
 
     public static World getInstance() {
@@ -186,10 +180,6 @@ public class World {
 
     public Location getSouthwest() {
         return mSouthwest;
-    }
-
-    public List<Vehicle> getVehiclesAtLocation(Location location) {
-        return mOccupiedMap.get(location);
     }
 
     public boolean inside(Location location) {
@@ -218,18 +208,14 @@ public class World {
                 worldGC.stroke();
             }
         }
-        for (AbstractPort port : getPorts()) {
-            port.draw(worldGC);
-        }
+
 
         for (Route route : mRoutes) {
-            route.draw(objectGC);
+            route.draw(worldGC);
         }
 
-        for (Location[] locations : mLocations) {
-            for (Location location : locations) {
-                location.draw(objectGC);
-            }
+        for (Location crossing : mCrossings) {
+            crossing.draw(worldGC);
         }
 
         objectGC.setFill(Color.TRANSPARENT);
@@ -252,12 +238,14 @@ public class World {
             @Override
             public void run() {
                 while (run) {
-                    for (List<Vehicle> vehicles : mOccupiedMap.values()) {
-                        for (final Vehicle vehicle : vehicles) {
+                    run = false;
+                    for (final GameObject gameObject : mGameObjects) {
+                        if (gameObject instanceof Drawable) {
+                            Main.logger.log(Logger.VERBOSE, "Drawing " + gameObject);
                             Platform.runLater(new Runnable() {
                                 @Override
                                 public void run() {
-                                    vehicle.draw(objectGC);
+                                    ((Drawable) gameObject).draw(objectGC);
                                 }
                             });
                         }
@@ -272,5 +260,11 @@ public class World {
         };
         thread.setDaemon(true);
         thread.start();
+    }
+
+    public void registerGameObject(GameObject gameObject) {
+        synchronized (mGameObjects) {
+            mGameObjects.add(gameObject);
+        }
     }
 }

@@ -3,6 +3,7 @@ package com.mewa.data.ports;
 import com.mewa.Main;
 import com.mewa.data.GameObject;
 import com.mewa.data.location.Location;
+import com.mewa.data.location.World;
 import com.mewa.data.vehicles.Vehicle;
 import com.mewa.ui.Drawable;
 import com.mewa.ui.controllers.GUIMain;
@@ -23,11 +24,6 @@ public abstract class AbstractPort extends GameObject implements HasPort, Drawab
 
     private final List<Vehicle> vehicles = Collections.synchronizedList(new ArrayList<Vehicle>());
 
-    private Location mLocation;
-
-    AbstractPort() {
-
-    }
 
     protected boolean receive(Vehicle vehicle) {
         synchronized (vehicles) {
@@ -57,15 +53,6 @@ public abstract class AbstractPort extends GameObject implements HasPort, Drawab
 
     public int getId() {
         return mId;
-    }
-
-    public void setLocation(Location location) {
-        this.mLocation = location;
-        Main.logger.log(Logger.VERBOSE, this + " @ " + mLocation);
-    }
-
-    public Location getLocation() {
-        return mLocation;
     }
 
     @Override

@@ -1,6 +1,8 @@
 package com.mewa.ui.controllers;
 
+import com.mewa.Main;
 import com.mewa.data.location.Location;
+import com.mewa.data.location.Route;
 import com.mewa.data.location.World;
 import com.mewa.data.ports.AbstractPort;
 import com.mewa.data.vehicles.Vehicle;
@@ -56,8 +58,8 @@ public class GUIMain {
         world = World.getInstance();
         logger.log(Logger.VERBOSE, "World created");
 
-        double width = (world.getSouthwest().getX() - world.getNortheast().getX()) * CELL_SIZE;
-        double height = (world.getSouthwest().getY() - world.getNortheast().getY()) * CELL_SIZE;
+        double width = (world.getNortheast().getX() - world.getSouthwest().getX()) * CELL_SIZE;
+        double height = (world.getNortheast().getY() - world.getSouthwest().getY()) * CELL_SIZE;
 
         worldCanvas.setWidth(width);
         worldCanvas.setHeight(height);
@@ -90,9 +92,10 @@ public class GUIMain {
                 return;
             }
         }
-        for (Vehicle vehicle : world.getVehiclesAtLocation(clickLocation)) {
-            vehicle.onClick(this);
-        }
+        for (Route route : world.getRoutes)
+//        for (Vehicle vehicle : world.getVehiclesAtLocation(clickLocation)) {
+//            vehicle.onClick(this);
+//        }
     }
 
     public void showPortPanel(AbstractPort port) {
@@ -103,7 +106,25 @@ public class GUIMain {
             portPane.setPort(port);
             if (infoStage == null) {
                 infoStage = new Stage();
-                infoStage.setAlwaysOnTop(true);
+                //infoStage.setAlwaysOnTop(true);
+            }
+            infoStage.hide();
+            infoStage.setScene(portScene);
+            infoStage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void showRoutePanel(Route route) {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("port_info.fxml"));
+        try {
+            portScene = new Scene((Parent) loader.load());
+            InfoPane portPane = loader.getController();
+            portPane.setRoute(route);
+            if (infoStage == null) {
+                infoStage = new Stage();
+                //infoStage.setAlwaysOnTop(true);
             }
             infoStage.hide();
             infoStage.setScene(portScene);

@@ -52,9 +52,14 @@ public class Location implements Comparable<Location>, Drawable {
     public boolean equals(Object obj) {
         if (obj instanceof Location) {
             Location location = (Location) obj;
-            return Math.abs(mX - location.getX()) < 0.5 && Math.abs(mY - location.getY()) < 0.5;
+            return Math.abs(mX - location.getX()) < 1 && Math.abs(mY - location.getY()) < 1;
         }
         return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return (int) mX << 4 | (int) mY;
     }
 
     @Override

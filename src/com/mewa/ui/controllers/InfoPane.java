@@ -2,6 +2,7 @@ package com.mewa.ui.controllers;
 
 import com.mewa.data.GameObject;
 import com.mewa.data.location.Location;
+import com.mewa.data.location.Route;
 import com.mewa.data.ports.AbstractPort;
 import com.mewa.data.ports.Airport;
 import com.mewa.data.ports.CivilAirport;
@@ -33,6 +34,7 @@ public class InfoPane {
 
     public void setPort(GameObject gameObject) {
         root.setText(gameObject.getClass().getSimpleName());
+        addRow("Location", String.format("%.2f x %.2f", gameObject.getLocation().getX(), gameObject.getLocation().getY()));
         if (gameObject instanceof AbstractPort) {
             AbstractPort port = (AbstractPort) gameObject;
             if (gameObject instanceof Airport) {
@@ -49,10 +51,8 @@ public class InfoPane {
                     });
                 }
             }
-            addRow("Location", port.getLocation().getX() + " x " + port.getLocation().getY());
         } else if (gameObject instanceof Vehicle) {
             Vehicle vehicle = (Vehicle) gameObject;
-            addRow("Location", vehicle.getLocation().getX() + " x " + vehicle.getLocation().getY());
         }
 
     }
@@ -71,6 +71,12 @@ public class InfoPane {
             }
         });
         main.getChildren().add(btn);
+    }
+
+    public void setRoute(Route route) {
+        for (Location location : route.getStops()) {
+            addRow("Stop", String.format("%.2f x %.2f", location.getX(), location.getY()));
+        }
     }
 
     public interface OnClickListener {

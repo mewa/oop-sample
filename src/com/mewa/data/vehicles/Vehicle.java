@@ -19,7 +19,6 @@ public abstract class Vehicle extends GameObject implements Drawable {
     private static AtomicInteger idGenerator = new AtomicInteger();
 
     private int mId = idGenerator.getAndIncrement();
-    private Location mLocation;
     private Route mRoute;
     private Thread mVehicleThread;
     private int mLocationsTraversed = 0;
@@ -64,17 +63,6 @@ public abstract class Vehicle extends GameObject implements Drawable {
 
     public int getId() {
         return mId;
-    }
-
-    public Location getLocation() {
-        return mLocation;
-    }
-
-    public void moveTo(Location location) {
-        location.onVehicleArriving(this);
-        if (mLocation != null)
-            mLocation.onVehicleLeaving(this);
-        this.mLocation = location;
     }
 
     @Override
