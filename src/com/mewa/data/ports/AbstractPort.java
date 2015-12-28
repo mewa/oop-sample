@@ -3,15 +3,14 @@ package com.mewa.data.ports;
 import com.mewa.Main;
 import com.mewa.data.GameObject;
 import com.mewa.data.location.Location;
+import com.mewa.data.location.Route;
 import com.mewa.data.location.World;
 import com.mewa.data.vehicles.Vehicle;
 import com.mewa.ui.Drawable;
 import com.mewa.ui.controllers.GUIMain;
 import com.mewa.utils.i.Logger;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -24,8 +23,10 @@ public abstract class AbstractPort extends GameObject implements HasPort, Drawab
 
     private final List<Vehicle> vehicles = Collections.synchronizedList(new ArrayList<Vehicle>());
 
+    private final Map<Route, Integer> mRoutes = Collections.synchronizedMap(new HashMap<Route, Integer>());
 
-    protected boolean receive(Vehicle vehicle) {
+
+    public boolean receive(Vehicle vehicle) {
         synchronized (vehicles) {
             vehicles.add(vehicle);
         }
@@ -33,9 +34,14 @@ public abstract class AbstractPort extends GameObject implements HasPort, Drawab
         return true;
     }
 
-    protected boolean depart(Vehicle vehicle) {
+    public boolean depart(Vehicle vehicle) {
         synchronized (vehicles) {
             vehicles.remove(vehicle);
+        }
+        synchronized (mRoutes) {
+            vehicle.setLocation(new Location(getLocation()));
+            Map.Entry<Route, Integer> next = mRoutes.entrySet().iterator().next();
+            vehicle.setRoute(next.getKey(), next.getValue());
         }
         Main.logger.log(Logger.ERROR, vehicle + " departed from " + this);
         return true;
@@ -58,5 +64,9 @@ public abstract class AbstractPort extends GameObject implements HasPort, Drawab
     @Override
     public void onClick(GUIMain guiMain) {
         guiMain.showPortPanel(this);
+    }
+
+    public void addRoute(Route route, int direction) {
+        mRoutes.put(route, direction);
     }
 }

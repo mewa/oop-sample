@@ -16,6 +16,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
@@ -58,8 +59,8 @@ public class GUIMain {
         world = World.getInstance();
         logger.log(Logger.VERBOSE, "World created");
 
-        double width = (world.getNortheast().getX() - world.getSouthwest().getX()) * CELL_SIZE;
-        double height = (world.getNortheast().getY() - world.getSouthwest().getY()) * CELL_SIZE;
+        double width = (world.getNortheast().getX() - world.getSouthwest().getX() + 1) * CELL_SIZE;
+        double height = (world.getNortheast().getY() - world.getSouthwest().getY() + 1) * CELL_SIZE;
 
         worldCanvas.setWidth(width);
         worldCanvas.setHeight(height);
@@ -83,19 +84,34 @@ public class GUIMain {
     }
 
     public void vehicleClicked(MouseEvent event) {
-        Location clickLocation = new Location((int) event.getX() / CELL_SIZE, (int) event.getY() / CELL_SIZE);
+        Location clickLocation = new Location((event.getX() - 0.5 * CELL_SIZE) / CELL_SIZE, (event.getY() - 0.5 * CELL_SIZE) / CELL_SIZE);
         logger.log(Logger.VERBOSE, "clickLocation: %s", clickLocation);
-        for (AbstractPort port : world.getPorts()) {
-            if (port.getLocation().equals(clickLocation)) {
-                logger.log(Logger.VERBOSE, "Port clicked: %s", port);
-                port.onClick(this);
-                return;
+        if (event.getButton().equals(MouseButton.PRIMARY)) {
+            for (AbstractPort port : world.getPorts()) {
+                if (world.checkCollision(port.getLocation(), clickLocation)) {
+                    logger.log(Logger.VERBOSE, "Port clicked: %s", port);
+                    port.onClick(this);
+                    return;
+                }
+            }
+            for (Vehicle vehicle : world.getVehicles()) {
+                if (world.checkCollision(vehicle.getLocation(), clickLocation)) {
+                    logger.log(Logger.VERBOSE, "Vehicle clicked: %s", vehicle);
+                    vehicle.onClick(this);
+                    return;
+                }
+            }
+        } else if (event.getButton().equals(MouseButton.SECONDARY)) {
+            for (Route route : world.getRoutes()) {
+                for (Location stop : route.getStops()) {
+                    if (world.checkCollision(stop, clickLocation)) {
+                        logger.log(Logger.VERBOSE, "Route clicked: %s", route);
+                        route.onClick(this);
+                        return;
+                    }
+                }
             }
         }
-        for (Route route : world.getRoutes)
-//        for (Vehicle vehicle : world.getVehiclesAtLocation(clickLocation)) {
-//            vehicle.onClick(this);
-//        }
     }
 
     public void showPortPanel(AbstractPort port) {
@@ -122,6 +138,23 @@ public class GUIMain {
             portScene = new Scene((Parent) loader.load());
             InfoPane portPane = loader.getController();
             portPane.setRoute(route);
+            if (infoStage == null) {
+                infoStage = new Stage();
+                //infoStage.setAlwaysOnTop(true);
+            }
+            infoStage.hide();
+            infoStage.setScene(portScene);
+            infoStage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public void showVehiclePanel(Vehicle route) {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("port_info.fxml"));
+        try {
+            portScene = new Scene((Parent) loader.load());
+            InfoPane portPane = loader.getController();
+            portPane.setVehicle(route);
             if (infoStage == null) {
                 infoStage = new Stage();
                 //infoStage.setAlwaysOnTop(true);

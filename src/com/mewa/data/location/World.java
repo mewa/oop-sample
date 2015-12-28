@@ -8,6 +8,7 @@ import com.mewa.data.vehicles.planes.PassengerPlane;
 import com.mewa.data.vehicles.ships.AircraftCarrier;
 import com.mewa.data.vehicles.ships.CruiseShip;
 import com.mewa.ui.Drawable;
+import com.mewa.ui.controllers.GUIMain;
 import com.mewa.utils.i.Logger;
 import javafx.application.Platform;
 import javafx.scene.canvas.GraphicsContext;
@@ -41,7 +42,7 @@ public class World {
     private final List<AbstractPort> mCivilAirports = Collections.synchronizedList(new ArrayList<AbstractPort>());
     private final List<AbstractPort> mCivilNavalPorts = Collections.synchronizedList(new ArrayList<AbstractPort>());
     private final List<Route> mRoutes = Collections.synchronizedList(new ArrayList<Route>());
-    private final List<Location> mCrossings = Collections.synchronizedList(new ArrayList<Location>());
+    private final List<Crossing> mCrossings = Collections.synchronizedList(new ArrayList<Crossing>());
 
     private World() {
         create();
@@ -57,28 +58,62 @@ public class World {
         );
         spawnPorts();
         //spawnVehicles();
+        while (mCrossings.size() < 16) {
+            Crossing crossing = new Crossing();
+            spawnAtRandomLocation(this, crossing);
+            mCrossings.add(crossing);
+        }
         spawnRoutes(mMilitaryAirports);
         spawnRoutes(mMilitaryNavalPorts);
         spawnRoutes(mCivilNavalPorts);
         spawnRoutes(mCivilAirports);
     }
 
+    public double getWidth() {
+        return mNortheast.getX() - mSouthwest.getX();
+    }
+
+    public double getHeight() {
+        return mNortheast.getY() - mSouthwest.getY();
+    }
+
     private void spawnRoutes(List<AbstractPort> ports) {
-        for (int i = 0; i < ports.size(); ++i) {
-            for (int j = 1; j < ports.size(); ++j) {
-                if (i == j || Math.random() > 0.1)
-                    continue;
-                Route route = new Route();
-                makeRoute(route, ports.get(i).getLocation(), ports.get(j).getLocation());
-                mRoutes.add(route);
-            }
+        for (int i = 0; i < ports.size() - 1; ++i) {
+            AbstractPort port = ports.get(i);
+            AbstractPort port2 = ports.get(i + 1);
+            Route route = new Route(port, port2);
+            makeRoute(route, port, port2);
+            mRoutes.add(route);
+            port.addRoute(route, 1);
+            port2.addRoute(route, -1);
+        }
+        if (ports.size() != 0) {
+            AbstractPort port = ports.get(0);
+            AbstractPort port2 = ports.get(ports.size() - 1);
+            Route route = new Route(port, port2);
+            makeRoute(route, port, port2);
+            mRoutes.add(route);
         }
     }
 
-    private void makeRoute(Route route, Location location1, Location location2) {
-        route.getStops().add(location1);
-        //route.getStops().add(location1.closest(mCrossings));
-        route.getStops().add(location2);
+    private void makeRoute(Route route, AbstractPort location1, AbstractPort location2) {
+        route.getStops().add(location1.getLocation());
+        route.getStops().add(closestCrossing(location1.getLocation(), location2.getLocation()));
+        route.getStops().add(location2.getLocation());
+        registerGameObject(route);
+    }
+
+    private Location closestCrossing(Location location1, Location location2) {
+        double distance = location1.distanceTo(mCrossings.get(0).getLocation()) + location2.distanceTo(mCrossings.get(0).getLocation());
+        Crossing closest = mCrossings.get(0);
+        for (Crossing crossing : mCrossings) {
+            double tmp = location1.distanceTo(crossing.getLocation()) + location2.distanceTo(crossing.getLocation());
+            if (tmp < distance) {
+                distance = tmp;
+                closest = crossing;
+            }
+        }
+        return closest.getLocation();
     }
 
     private void spawnPorts() {
@@ -145,11 +180,16 @@ public class World {
         synchronized (mGameObjects) {
             for (GameObject gameObject2 : mGameObjects) {
                 if (gameObject1 != gameObject2) {
-                    if (gameObject1.getLocation().compareTo(gameObject2.getLocation()) == 0)
-                        return true;
+                    return checkCollision(gameObject1.getLocation(), gameObject2.getLocation());
                 }
             }
         }
+        return false;
+    }
+
+    public boolean checkCollision(Location location1, Location location2) {
+        if (Math.abs(location1.getX() - location2.getX()) < 0.5 && Math.abs(location1.getY() - location2.getY()) < 0.5)
+            return true;
         return false;
     }
 
@@ -182,11 +222,6 @@ public class World {
         return mSouthwest;
     }
 
-    public boolean inside(Location location) {
-        return location.getX() >= mSouthwest.getX() && location.getY() >= mSouthwest.getY()
-                && location.getX() <= mNortheast.getX() && location.getY() <= mNortheast.getY();
-    }
-
     public List<AbstractPort> getPorts() {
         return mPorts;
     }
@@ -209,49 +244,53 @@ public class World {
             }
         }
 
-
-        for (Route route : mRoutes) {
-            route.draw(worldGC);
-        }
-
-        for (Location crossing : mCrossings) {
+        for (Crossing crossing : mCrossings) {
             crossing.draw(worldGC);
         }
 
-        objectGC.setFill(Color.TRANSPARENT);
-        Thread thread = new Thread() {
+        final Thread thread = new Thread() {
 
-            final double fps = 15;
-
-            final int msFrame = (int) (1000 / fps);
-
-            long lastTime = System.currentTimeMillis();
-
-            private boolean limitFPS() {
-                long time = System.currentTimeMillis();
-                boolean limit = lastTime + fps > time;
-                if (!limit)
-                    lastTime = time;
-                return limit;
-            }
+            Semaphore drawLock = new Semaphore(1);
 
             @Override
             public void run() {
                 while (run) {
-                    run = false;
-                    for (final GameObject gameObject : mGameObjects) {
-                        if (gameObject instanceof Drawable) {
-                            Main.logger.log(Logger.VERBOSE, "Drawing " + gameObject);
-                            Platform.runLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    ((Drawable) gameObject).draw(objectGC);
-                                }
-                            });
+                    try {
+                        drawLock.acquire();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            objectGC.setFill(Color.TRANSPARENT);
+                            objectGC.clearRect(0, 0, objectGC.getCanvas().getWidth(), objectGC.getCanvas().getHeight());
+                        }
+                    });
+                    synchronized (mGameObjects) {
+                        for (final GameObject gameObject : mGameObjects) {
+                            if (gameObject instanceof Drawable) {
+                                //Main.logger.log(Logger.VERBOSE, "Drawing " + gameObject);
+                                Platform.runLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        ((Drawable) gameObject).draw(objectGC);
+                                    }
+                                });
+                            }
                         }
                     }
+                    final Thread caller = this;
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            synchronized (caller) {
+                                drawLock.release();
+                            }
+                        }
+                    });
                     try {
-                        sleep(msFrame);
+                        sleep(1000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -266,5 +305,27 @@ public class World {
         synchronized (mGameObjects) {
             mGameObjects.add(gameObject);
         }
+        Main.logger.log(Logger.VERBOSE, "Registered " + gameObject + " @ " + gameObject.getLocation());
+    }
+
+    public List<Route> getRoutes() {
+        return mRoutes;
+    }
+
+    public void unregisterGameObject(GameObject gameObject) {
+        synchronized (mGameObjects) {
+            mGameObjects.remove(gameObject);
+        }
+        Main.logger.log(Logger.VERBOSE, "Unregistered " + gameObject + " @ " + gameObject.getLocation());
+    }
+
+    public List<Vehicle> getVehicles() {
+        List<Vehicle> vehicles = new ArrayList<Vehicle>();
+        for (GameObject gameObject : mGameObjects) {
+            if (gameObject instanceof Vehicle) {
+                vehicles.add((Vehicle) gameObject);
+            }
+        }
+        return vehicles;
     }
 }

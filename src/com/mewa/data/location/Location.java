@@ -1,10 +1,12 @@
 package com.mewa.data.location;
 
+import com.mewa.Main;
 import com.mewa.data.type.Airborne;
 import com.mewa.data.type.Naval;
 import com.mewa.data.vehicles.Vehicle;
 import com.mewa.data.vehicles.planes.Plane;
 import com.mewa.ui.Drawable;
+import com.mewa.utils.i.Logger;
 import javafx.scene.canvas.GraphicsContext;
 
 import java.util.Collection;
@@ -26,6 +28,12 @@ public class Location implements Comparable<Location>, Drawable {
         setY(y);
     }
 
+    public Location(Location location) {
+        Main.logger.log(Logger.VERBOSE, "location: " + location);
+        setX(location.getX());
+        setY((location.getY()));
+    }
+
 
     public double getX() {
         return mX;
@@ -45,14 +53,14 @@ public class Location implements Comparable<Location>, Drawable {
 
     @Override
     public String toString() {
-        return String.format("[Location: %.2f,%.2f]", getX(), getY());
+        return String.format("[Location: %.2f x %.2f]", getX(), getY());
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Location) {
             Location location = (Location) obj;
-            return Math.abs(mX - location.getX()) < 1 && Math.abs(mY - location.getY()) < 1;
+            return Math.abs(mX - location.getX()) < 0.001 && Math.abs(mY - location.getY()) < 0.001;
         }
         return super.equals(obj);
     }
@@ -84,7 +92,7 @@ public class Location implements Comparable<Location>, Drawable {
         return closestLocation;
     }
 
-    private double distanceTo(Location location) {
+    public double distanceTo(Location location) {
         return Math.pow(Math.pow(getX() - location.getX(), 2) + Math.pow(getY() - location.getY(), 2), 0.5);
     }
 

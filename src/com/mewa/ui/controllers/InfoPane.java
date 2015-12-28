@@ -3,6 +3,7 @@ package com.mewa.ui.controllers;
 import com.mewa.data.GameObject;
 import com.mewa.data.location.Location;
 import com.mewa.data.location.Route;
+import com.mewa.data.location.World;
 import com.mewa.data.ports.AbstractPort;
 import com.mewa.data.ports.Airport;
 import com.mewa.data.ports.CivilAirport;
@@ -32,29 +33,24 @@ public class InfoPane {
     public InfoPane() {
     }
 
-    public void setPort(GameObject gameObject) {
-        root.setText(gameObject.getClass().getSimpleName());
-        addRow("Location", String.format("%.2f x %.2f", gameObject.getLocation().getX(), gameObject.getLocation().getY()));
-        if (gameObject instanceof AbstractPort) {
-            AbstractPort port = (AbstractPort) gameObject;
-            if (gameObject instanceof Airport) {
-                Airport airport = (Airport) port;
-                addRow("Capacity", airport.getCapacity() + "");
-                if (airport instanceof CivilAirport) {
-                    final CivilAirport civilAirport = (CivilAirport) airport;
-                    addButton("Nowy samolot", new OnClickListener() {
-                        @Override
-                        public void onClick() {
-                            PassengerPlane plane = new PassengerPlane(10);
-                            civilAirport.acceptDeparture(plane);
-                        }
-                    });
-                }
+    public void setPort(AbstractPort port) {
+        root.setText(port.toString());
+        addRow("Location", String.format("%.2f x %.2f", port.getLocation().getX(), port.getLocation().getY()));
+        if (port instanceof Airport) {
+            Airport airport = (Airport) port;
+            addRow("Capacity", airport.getCapacity() + "");
+            if (airport instanceof CivilAirport) {
+                final CivilAirport civilAirport = (CivilAirport) airport;
+                addButton("Nowy samolot", new OnClickListener() {
+                    @Override
+                    public void onClick() {
+                        PassengerPlane plane = new PassengerPlane(10);
+                        civilAirport.acceptDeparture(plane);
+                        World.getInstance().registerGameObject(plane);
+                    }
+                });
             }
-        } else if (gameObject instanceof Vehicle) {
-            Vehicle vehicle = (Vehicle) gameObject;
         }
-
     }
 
     private void addRow(String key, String value) {
@@ -74,8 +70,19 @@ public class InfoPane {
     }
 
     public void setRoute(Route route) {
+        root.setText(route.toString());
         for (Location location : route.getStops()) {
             addRow("Stop", String.format("%.2f x %.2f", location.getX(), location.getY()));
+        }
+    }
+
+    public void setVehicle(Vehicle vehicle) {
+        root.setText(vehicle.toString());
+        addRow("Location", String.format("%.2f x %.2f", vehicle.getLocation().getX(), vehicle.getLocation().getY()));
+        if (vehicle instanceof Plane) {
+            Plane plane = (Plane) vehicle;
+            addRow("Fuel", String.format("%.2f", plane.getFuel()));
+            addRow("Speed", String.format("%.3f", plane.getSpeed()));
         }
     }
 
