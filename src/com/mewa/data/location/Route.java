@@ -24,6 +24,7 @@ public class Route extends GameObject implements Drawable {
 
     private final List<Vehicle> normalDirection = Collections.synchronizedList(new ArrayList<Vehicle>());
     private final List<Vehicle> reverseDirection = Collections.synchronizedList(new ArrayList<Vehicle>());
+    private final Map<Vehicle, Integer> nextStopsMap = Collections.synchronizedMap(new HashMap<Vehicle, Integer>());
 
     public Route(AbstractPort port, AbstractPort port2) {
         super();
@@ -35,12 +36,18 @@ public class Route extends GameObject implements Drawable {
         return locations;
     }
 
-    public AbstractPort getOrigin() {
-        return origin;
+    public AbstractPort getOrigin(int direction) {
+        if (direction > 0)
+            return origin;
+        else
+            return destination;
     }
 
-    public AbstractPort getDestination() {
-        return destination;
+    public AbstractPort getDestination(int direction) {
+        if (direction > 0)
+            return destination;
+        else
+            return origin;
     }
 
     @Override
@@ -63,16 +70,22 @@ public class Route extends GameObject implements Drawable {
 
     @Override
     public String toString() {
-        return "Route " + getOrigin() + "-" + getDestination();
+        return "Route " + getOrigin(1) + "-" + getDestination(1);
     }
 
     public void addVehicle(int direction, Vehicle vehicle) {
         if (direction == 1) {
             synchronized (normalDirection) {
+                synchronized (nextStopsMap) {
+                    nextStopsMap.put(vehicle, 1);
+                }
                 normalDirection.add(vehicle);
             }
         } else if (direction == -1) {
             synchronized (reverseDirection) {
+                synchronized (nextStopsMap) {
+                    nextStopsMap.put(vehicle, locations.size() - 2);
+                }
                 reverseDirection.add(vehicle);
             }
         }
@@ -107,6 +120,28 @@ public class Route extends GameObject implements Drawable {
         } else if (direction == -1) {
             synchronized (reverseDirection) {
                 reverseDirection.remove(vehicle);
+            }
+        }
+    }
+
+    public Location getNextStop(Vehicle vehicle) {
+        synchronized (nextStopsMap) {
+            return locations.get(nextStopsMap.get(vehicle));
+        }
+    }
+
+    public boolean incStop(Vehicle vehicle, int direction) {
+        int pos;
+        synchronized (nextStopsMap) {
+            pos = nextStopsMap.get(vehicle);
+        }
+        synchronized (nextStopsMap) {
+            if (direction > 0) {
+                nextStopsMap.put(vehicle, ++pos);
+                return pos >= locations.size();
+            } else {
+                nextStopsMap.put(vehicle, --pos);
+                return pos < 0;
             }
         }
     }

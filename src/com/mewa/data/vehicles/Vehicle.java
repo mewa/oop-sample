@@ -38,17 +38,18 @@ public abstract class Vehicle extends GameObject implements Drawable {
                     if (mRoute != null) {
                         synchronized (mRoute) {
                             if (!mRoute.collidesWithNext(Vehicle.this, direction)) {
+                                boolean isAtDestination = false;
                                 // travel
-                                if (World.getInstance().checkCollision(getLocation(), mRoute.getStops().get(mLocationsTraversed))) {
-                                    mLocationsTraversed++;
+                                if (World.getInstance().checkCollision(getLocation(), mRoute.getNextStop(Vehicle.this))) {
+                                    isAtDestination = mRoute.incStop(Vehicle.this, direction);
                                 }
-                                if (mLocationsTraversed < mRoute.getStops().size()) {
-                                    Location nextLocation = mRoute.getStops().get(mLocationsTraversed);
+                                if (!isAtDestination) {
+                                    Location nextLocation = mRoute.getNextStop(Vehicle.this);
                                     travelTo(nextLocation);
                                 } else {
-                                    mRoute.getDestination().receive(Vehicle.this);
+                                    mRoute.getDestination(direction).receive(Vehicle.this);
                                     World.getInstance().unregisterGameObject(Vehicle.this);
-                                    mRoute = null;
+                                    setRoute(null, 1);
                                 }
                             } else {
                                 //Main.logger.log(Logger.VERBOSE, this + " has collided with next");
@@ -89,6 +90,7 @@ public abstract class Vehicle extends GameObject implements Drawable {
 
     public void setRoute(Route route, int direction) {
         this.direction = direction;
+        mLocationsTraversed = 0;
         if (route == null) {
             synchronized (mRoute) {
                 mRoute.removeVehicle(direction, this);
