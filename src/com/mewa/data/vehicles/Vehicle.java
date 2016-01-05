@@ -5,11 +5,9 @@ import com.mewa.data.GameObject;
 import com.mewa.data.location.Location;
 import com.mewa.data.location.Route;
 import com.mewa.data.location.World;
-import com.mewa.data.ports.HasPort;
 import com.mewa.ui.Drawable;
 import com.mewa.ui.controllers.GUIMain;
 import com.mewa.utils.i.Logger;
-import com.sun.javafx.geom.Vec2d;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -37,19 +35,19 @@ public abstract class Vehicle extends GameObject implements Drawable {
                 while (true) {
                     if (mRoute != null) {
                         synchronized (mRoute) {
-                            if (!mRoute.collidesWithNext(Vehicle.this, direction)) {
+                            if (!mRoute.collidesWithNext(Vehicle.this, getDirection())) {
                                 boolean isAtDestination = false;
                                 // travel
                                 if (World.getInstance().checkCollision(getLocation(), mRoute.getNextStop(Vehicle.this))) {
-                                    isAtDestination = mRoute.incStop(Vehicle.this, direction);
+                                    isAtDestination = mRoute.incStop(Vehicle.this, getDirection());
                                 }
                                 if (!isAtDestination) {
                                     Location nextLocation = mRoute.getNextStop(Vehicle.this);
                                     travelTo(nextLocation);
                                 } else {
-                                    mRoute.getDestination(direction).receive(Vehicle.this);
+                                    mRoute.getDestination(getDirection()).receive(Vehicle.this);
                                     World.getInstance().unregisterGameObject(Vehicle.this);
-                                    setRoute(null, 1);
+                                    setRoute(null, getDirection());
                                 }
                             } else {
                                 //Main.logger.log(Logger.VERBOSE, this + " has collided with next");
@@ -89,7 +87,8 @@ public abstract class Vehicle extends GameObject implements Drawable {
     }
 
     public void setRoute(Route route, int direction) {
-        this.direction = direction;
+        Main.logger.log(Logger.VERBOSE, this + " has been assigned route " + route + ":" + direction);
+        this.setDirection(direction);
         mLocationsTraversed = 0;
         if (route == null) {
             synchronized (mRoute) {
@@ -108,5 +107,13 @@ public abstract class Vehicle extends GameObject implements Drawable {
                 mRoute.addVehicle(direction, this);
             }
         }
+    }
+
+    public int getDirection() {
+        return direction;
+    }
+
+    public void setDirection(int direction) {
+        this.direction = direction;
     }
 }

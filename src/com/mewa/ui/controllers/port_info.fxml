@@ -12,12 +12,12 @@
         <AnchorPane prefHeight="200.0" prefWidth="200.0">
             <children>
                 <VBox fx:id="main" layoutX="0.0" layoutY="0.0">
-                    <HBox prefHeight="100.0" prefWidth="200.0">
+                    <HBox>
                         <children>
-                            <VBox fx:id="properties" prefHeight="200.0" prefWidth="100.0">
+                            <VBox fx:id="properties">
 
                             </VBox>
-                            <VBox fx:id="values" prefHeight="200.0" prefWidth="100.0">
+                            <VBox fx:id="values">
 
                             </VBox>
                         </children>

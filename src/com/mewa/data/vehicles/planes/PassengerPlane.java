@@ -53,7 +53,7 @@ public class PassengerPlane extends Plane implements Civil {
         gc.setFill(Color.DEEPSKYBLUE);
         gc.setFont(Font.font("sans-serif", FontWeight.BOLD, 14));
         gc.fillText(
-                "PP",
+                "PP" + getId(),
                 getLocation().getX() * GUIMain.CELL_SIZE,
                 getLocation().getY() * GUIMain.CELL_SIZE,
                 GUIMain.CELL_SIZE

@@ -40,8 +40,18 @@ public abstract class AbstractPort extends GameObject implements HasPort, Drawab
         }
         synchronized (mRoutes) {
             vehicle.setLocation(new Location(getLocation()));
-            Map.Entry<Route, Integer> next = mRoutes.entrySet().iterator().next();
-            vehicle.setRoute(next.getKey(), next.getValue());
+            Set<Map.Entry<Route, Integer>> next = mRoutes.entrySet();
+            int pos = Math.min((int) (Math.random() * next.size()), next.size());
+            Iterator<Map.Entry<Route, Integer>> it = next.iterator();
+            Map.Entry<Route, Integer> item = null;
+            Main.logger.log(Logger.VERBOSE, "routes: " + next + " pos: " + pos);
+            for (int i = 0; it.hasNext(); ++i) {
+                item = it.next();
+                if (pos == i) {
+                    break;
+                }
+            }
+            vehicle.setRoute(item.getKey(), item.getValue());
         }
         Main.logger.log(Logger.ERROR, vehicle + " departed from " + this);
         return true;

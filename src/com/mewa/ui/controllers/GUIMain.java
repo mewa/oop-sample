@@ -27,7 +27,7 @@ import java.io.IOException;
  * Created by Mewa on 2015-12-06.
  */
 public class GUIMain {
-    public static final int CELL_SIZE = 40;
+    public static final int CELL_SIZE = 24;
 
     public static Logger logger = new DebugLogger(new StandardOutput(), new SerialClock());
 

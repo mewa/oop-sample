@@ -1,6 +1,5 @@
 package com.mewa.ui.controllers;
 
-import com.mewa.data.GameObject;
 import com.mewa.data.location.Location;
 import com.mewa.data.location.Route;
 import com.mewa.data.location.World;
@@ -13,7 +12,6 @@ import com.mewa.data.vehicles.planes.Plane;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 
@@ -79,6 +77,8 @@ public class InfoPane {
     public void setVehicle(Vehicle vehicle) {
         root.setText(vehicle.toString());
         addRow("Location", String.format("%.2f x %.2f", vehicle.getLocation().getX(), vehicle.getLocation().getY()));
+        addRow("Route", vehicle.getRoute() + "");
+        addRow("Direction", vehicle.getDirection() + "");
         if (vehicle instanceof Plane) {
             Plane plane = (Plane) vehicle;
             addRow("Fuel", String.format("%.2f", plane.getFuel()));

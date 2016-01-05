@@ -84,7 +84,7 @@ public class Route extends GameObject implements Drawable {
         } else if (direction == -1) {
             synchronized (reverseDirection) {
                 synchronized (nextStopsMap) {
-                    nextStopsMap.put(vehicle, locations.size() - 2);
+                    nextStopsMap.put(vehicle, locations.size() - 1);
                 }
                 reverseDirection.add(vehicle);
             }
@@ -94,15 +94,15 @@ public class Route extends GameObject implements Drawable {
     public boolean collidesWithNext(Vehicle vehicle, int direction) {
         if (direction == 1) {
             synchronized (normalDirection) {
-                for (int i = 0; i < normalDirection.size() - 1; ++i) {
+                for (int i = normalDirection.size() - 1; i > 0; --i) {
                     if (normalDirection.get(i) == vehicle) {
-                        return World.getInstance().checkCollision(vehicle.getLocation(), normalDirection.get(i + 1).getLocation());
+                        return World.getInstance().checkCollision(vehicle.getLocation(), normalDirection.get(i - 1).getLocation());
                     }
                 }
             }
         } else if (direction == -1) {
             synchronized (reverseDirection) {
-                for (int i = reverseDirection.size() - 1; i-- > 1; ) {
+                for (int i = reverseDirection.size() - 1; i > 0; --i) {
                     if (reverseDirection.get(i) == vehicle) {
                         return World.getInstance().checkCollision(vehicle.getLocation(), reverseDirection.get(i - 1).getLocation());
                     }
@@ -134,8 +134,6 @@ public class Route extends GameObject implements Drawable {
         int pos;
         synchronized (nextStopsMap) {
             pos = nextStopsMap.get(vehicle);
-        }
-        synchronized (nextStopsMap) {
             if (direction > 0) {
                 nextStopsMap.put(vehicle, ++pos);
                 return pos >= locations.size();

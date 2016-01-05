@@ -22,8 +22,8 @@ import java.util.concurrent.Semaphore;
  */
 public class World {
     private static World instance;
-    private static final int kWidth = 15;
-    private static final int kHeight = 15;
+    private static final int kWidth = 25;
+    private static final int kHeight = 25;
 
     private static final Semaphore mWorldLock = new Semaphore(1);
 
