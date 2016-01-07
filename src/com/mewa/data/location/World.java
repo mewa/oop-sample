@@ -16,6 +16,7 @@ import javafx.scene.paint.Color;
 
 import java.util.*;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by Mewa on 2015-10-12.
@@ -188,7 +189,7 @@ public class World {
     }
 
     public boolean checkCollision(Location location1, Location location2) {
-        if (Math.abs(location1.getX() - location2.getX()) < 0.5 && Math.abs(location1.getY() - location2.getY()) < 0.5)
+        if (Math.abs(location1.getX() - location2.getX()) < 0.6 && Math.abs(location1.getY() - location2.getY()) < 0.6)
             return true;
         return false;
     }
@@ -250,47 +251,42 @@ public class World {
 
         final Thread thread = new Thread() {
 
-            Semaphore drawLock = new Semaphore(1);
+            AtomicBoolean finishedPass = new AtomicBoolean(true);
 
             @Override
             public void run() {
                 while (run) {
-                    try {
-                        drawLock.acquire();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            objectGC.setFill(Color.TRANSPARENT);
-                            objectGC.clearRect(0, 0, objectGC.getCanvas().getWidth(), objectGC.getCanvas().getHeight());
-                        }
-                    });
-                    synchronized (mGameObjects) {
-                        for (final GameObject gameObject : mGameObjects) {
-                            if (gameObject instanceof Drawable) {
-                                //Main.logger.log(Logger.VERBOSE, "Drawing " + gameObject);
-                                Platform.runLater(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        ((Drawable) gameObject).draw(objectGC);
-                                    }
-                                });
+                    if (finishedPass.get()) {
+                        finishedPass.set(false);
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                objectGC.setFill(Color.TRANSPARENT);
+                                objectGC.clearRect(0, 0, objectGC.getCanvas().getWidth(), objectGC.getCanvas().getHeight());
+                            }
+                        });
+                        synchronized (mGameObjects) {
+                            for (final GameObject gameObject : mGameObjects) {
+                                if (gameObject instanceof Drawable) {
+                                    Platform.runLater(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            ((Drawable) gameObject).draw(objectGC);
+                                        }
+                                    });
+                                }
                             }
                         }
-                    }
-                    final Thread caller = this;
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            synchronized (caller) {
-                                drawLock.release();
+                        final Thread caller = this;
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                finishedPass.set(true);
                             }
-                        }
-                    });
+                        });
+                    }
                     try {
-                        sleep(1000);
+                        sleep(1000 / 60);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

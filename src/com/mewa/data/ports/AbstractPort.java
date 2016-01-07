@@ -25,11 +25,23 @@ public abstract class AbstractPort extends GameObject implements HasPort, Drawab
 
     private final Map<Route, Integer> mRoutes = Collections.synchronizedMap(new HashMap<Route, Integer>());
 
-
-    public boolean receive(Vehicle vehicle) {
+    public boolean receive(final Vehicle vehicle) {
         synchronized (vehicles) {
             vehicles.add(vehicle);
         }
+        new Thread(vehicle + "-departure-" + this) {
+            @Override
+            public void run() {
+                try {
+                    long delay = (long) (2000 + Math.random() * 5000);
+                    Main.logger.log(Logger.VERBOSE, "%s departing from %s in %.3fs", vehicle, this, delay / 1000.0);
+                    sleep(delay);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                depart(vehicle);
+            }
+        }.start();
         Main.logger.log(Logger.ERROR, vehicle + " arrived at " + this);
         return true;
     }
@@ -38,6 +50,7 @@ public abstract class AbstractPort extends GameObject implements HasPort, Drawab
         synchronized (vehicles) {
             vehicles.remove(vehicle);
         }
+        World.getInstance().registerGameObject(vehicle);
         synchronized (mRoutes) {
             vehicle.setLocation(new Location(getLocation()));
             Set<Map.Entry<Route, Integer>> next = mRoutes.entrySet();

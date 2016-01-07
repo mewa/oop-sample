@@ -1,13 +1,18 @@
 package com.mewa.data.ports;
 
 import com.mewa.Main;
+import com.mewa.data.location.Location;
+import com.mewa.data.location.World;
 import com.mewa.data.type.Airborne;
 import com.mewa.data.vehicles.Vehicle;
+import com.mewa.data.vehicles.planes.Plane;
 import com.mewa.ui.Drawable;
 import com.mewa.ui.controllers.GUIMain;
 import com.mewa.utils.i.Logger;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+
+import java.util.ListIterator;
 
 /**
  * Created by Mewa on 2015-10-12.

@@ -27,7 +27,7 @@ import java.io.IOException;
  * Created by Mewa on 2015-12-06.
  */
 public class GUIMain {
-    public static final int CELL_SIZE = 24;
+    public static final int CELL_SIZE = 30;
 
     public static Logger logger = new DebugLogger(new StandardOutput(), new SerialClock());
 
@@ -46,6 +46,7 @@ public class GUIMain {
     private World world;
     private Scene portScene;
     private Stage infoStage;
+    private Stage mainStage;
 
     public GUIMain() throws IOException {
         logger.setLogLevel(Logger.VERBOSE);
@@ -55,6 +56,7 @@ public class GUIMain {
     }
 
     public void start(Stage stage) {
+        mainStage = stage;
         logger.log(Logger.VERBOSE, "Creating World");
         world = World.getInstance();
         logger.log(Logger.VERBOSE, "World created");

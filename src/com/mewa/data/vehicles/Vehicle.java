@@ -55,7 +55,7 @@ public abstract class Vehicle extends GameObject implements Drawable {
                         }
                     }
                     try {
-                        Thread.sleep(500);
+                        Thread.sleep(1);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
