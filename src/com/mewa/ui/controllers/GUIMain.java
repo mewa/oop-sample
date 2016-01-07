@@ -128,6 +128,8 @@ public class GUIMain {
             }
             infoStage.hide();
             infoStage.setScene(portScene);
+            infoStage.setX(mainStage.getX() + mainStage.getWidth() + 10);
+            infoStage.setY(mainStage.getY());
             infoStage.show();
         } catch (IOException e) {
             e.printStackTrace();
@@ -163,6 +165,8 @@ public class GUIMain {
             }
             infoStage.hide();
             infoStage.setScene(portScene);
+            infoStage.setX(mainStage.getX() + mainStage.getWidth() + 10);
+            infoStage.setY(mainStage.getY());
             infoStage.show();
         } catch (IOException e) {
             e.printStackTrace();
