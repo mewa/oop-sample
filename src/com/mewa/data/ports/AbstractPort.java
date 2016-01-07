@@ -51,8 +51,15 @@ public abstract class AbstractPort extends GameObject implements HasPort, Drawab
             vehicles.remove(vehicle);
         }
         World.getInstance().registerGameObject(vehicle);
+        vehicle.setLocation(new Location(getLocation()));
+        Map.Entry<Route, Integer> item = getRandomRoute();
+        vehicle.setRoute(item.getKey(), item.getValue());
+        Main.logger.log(Logger.ERROR, vehicle + " departed from " + this);
+        return true;
+    }
+
+    public Map.Entry<Route, Integer> getRandomRoute() {
         synchronized (mRoutes) {
-            vehicle.setLocation(new Location(getLocation()));
             Set<Map.Entry<Route, Integer>> next = mRoutes.entrySet();
             int pos = Math.min((int) (Math.random() * next.size()), next.size());
             Iterator<Map.Entry<Route, Integer>> it = next.iterator();
@@ -64,10 +71,12 @@ public abstract class AbstractPort extends GameObject implements HasPort, Drawab
                     break;
                 }
             }
-            vehicle.setRoute(item.getKey(), item.getValue());
+            return item;
         }
-        Main.logger.log(Logger.ERROR, vehicle + " departed from " + this);
-        return true;
+    }
+
+    public Map<Route, Integer> getRoutes() {
+        return mRoutes;
     }
 
     @Override

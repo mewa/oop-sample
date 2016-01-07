@@ -19,14 +19,6 @@ public class CivilAirport extends Airport {
         super((int) (Math.random() * 10 + 1));
     }
 
-    public <T extends Plane & Civil> void acceptArrival(T civilPlane) {
-        receive(civilPlane);
-    }
-
-    public <T extends Plane & Civil> void acceptDeparture(T civilPlane) {
-        depart(civilPlane);
-    }
-
     @Override
     public void draw(GraphicsContext gc) {
         gc.setFill(Color.color(Color.DEEPSKYBLUE.getRed(), Color.DEEPSKYBLUE.getGreen(), Color.DEEPSKYBLUE.getBlue(), 0.3));

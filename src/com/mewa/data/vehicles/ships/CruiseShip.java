@@ -52,7 +52,7 @@ public class CruiseShip extends Ship implements Civil {
         gc.setFill(Color.DARKSEAGREEN);
         gc.setFont(Font.font("sans-serif", FontWeight.BOLD, 14));
         gc.fillText(
-                "AC",
+                "CS" + getId(),
                 getLocation().getX() * GUIMain.CELL_SIZE,
                 getLocation().getY() * GUIMain.CELL_SIZE,
                 GUIMain.CELL_SIZE

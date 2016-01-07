@@ -118,7 +118,7 @@ public class World {
     }
 
     private void spawnPorts() {
-        while (mMilitaryAirports.size() + mCivilAirports.size() < 10 || mCivilNavalPorts.size() + mMilitaryNavalPorts.size() < 5) {
+        while (mMilitaryAirports.size() < 5 || mCivilAirports.size() < 5 || mCivilNavalPorts.size() + mMilitaryNavalPorts.size() < 5) {
             AbstractPort port;
             switch ((int) (Math.random() * 4)) {
                 case 0:
@@ -323,5 +323,9 @@ public class World {
             }
         }
         return vehicles;
+    }
+
+    public List<AbstractPort> getMilitaryAirports() {
+        return mMilitaryAirports;
     }
 }

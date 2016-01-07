@@ -4,13 +4,14 @@ import com.mewa.data.GameObject;
 import com.mewa.data.GameObjectUpdateListener;
 import com.mewa.data.location.Location;
 import com.mewa.data.location.Route;
-import com.mewa.data.ports.AbstractPort;
-import com.mewa.data.ports.Airport;
-import com.mewa.data.ports.CivilAirport;
+import com.mewa.data.ports.*;
 import com.mewa.data.type.Civil;
+import com.mewa.data.type.Military;
 import com.mewa.data.vehicles.Vehicle;
 import com.mewa.data.vehicles.planes.PassengerPlane;
 import com.mewa.data.vehicles.planes.Plane;
+import com.mewa.data.vehicles.ships.AircraftCarrier;
+import com.mewa.data.vehicles.ships.CruiseShip;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -55,7 +56,26 @@ public class InfoPane {
                     @Override
                     public void onClick() {
                         PassengerPlane plane = new PassengerPlane(10);
-                        civilAirport.acceptDeparture(plane);
+                        civilAirport.depart(plane);
+                    }
+                });
+            }
+        } else if (port instanceof NavalPort) {
+            final NavalPort navalPort = (NavalPort) port;
+            if (navalPort instanceof CivilNavalPort) {
+                addButton("Nowy wycieczkowiec", new OnClickListener() {
+                    @Override
+                    public void onClick() {
+                        CruiseShip cs = new CruiseShip(1234);
+                        navalPort.depart(cs);
+                    }
+                });
+            } else if (navalPort instanceof MilitaryNavalPort) {
+                addButton("Nowy lotniskowiec", new OnClickListener() {
+                    @Override
+                    public void onClick() {
+                        AircraftCarrier ac = new AircraftCarrier();
+                        navalPort.depart(ac);
                     }
                 });
             }

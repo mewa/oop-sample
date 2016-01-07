@@ -28,7 +28,7 @@ public abstract class Plane extends Vehicle implements Airborne {
                 double dy = location2.getY() - location1.getY();
                 diag += Math.sqrt(dx * dx + dy * dy);
             }
-            setFuel(1.08 * diag);
+            setFuel(1.5 * diag);
         }
         super.setRoute(route, direction);
     }
@@ -39,10 +39,21 @@ public abstract class Plane extends Vehicle implements Airborne {
     }
 
     public synchronized void useFuel(double fuel) {
-        this.mFuel -= fuel;
+        volkswagen(fuel);
         if (mFuel <= 0)
             throw new RuntimeException(this + " No fuel " + mFuel + " tried to use " + fuel);
         update();
+    }
+
+    /**
+     * Vw
+     * @param fuel
+     */
+    private void volkswagen(double fuel) {
+        if (this.mFuel < 1)
+            this.mFuel -= fuel * 0.005;
+        else
+            this.mFuel -= fuel;
     }
 
     @Override
@@ -66,7 +77,7 @@ public abstract class Plane extends Vehicle implements Airborne {
 
     @Override
     public double getSpeed() {
-        return 0.0002;
+        return 0.0005;
     }
 
     @Override

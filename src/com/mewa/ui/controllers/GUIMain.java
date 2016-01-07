@@ -10,6 +10,7 @@ import com.mewa.utils.SerialClock;
 import com.mewa.utils.StandardOutput;
 import com.mewa.utils.i.Logger;
 import com.mewa.utils.loggers.DebugLogger;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -20,6 +21,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import java.io.IOException;
 
@@ -57,6 +59,12 @@ public class GUIMain {
 
     public void start(Stage stage) {
         mainStage = stage;
+        mainStage.setOnHiding(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent event) {
+                System.exit(0);
+            }
+        });
         logger.log(Logger.VERBOSE, "Creating World");
         world = World.getInstance();
         logger.log(Logger.VERBOSE, "World created");
