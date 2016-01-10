@@ -2,7 +2,8 @@ package com.mewa.data.vehicles;
 
 import com.mewa.Main;
 import com.mewa.data.GameObject;
-import com.mewa.data.location.Location;
+import com.mewa.data.Localizable;
+import com.mewa.data.location.Crossing;
 import com.mewa.data.location.Route;
 import com.mewa.data.location.World;
 import com.mewa.ui.Drawable;
@@ -14,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by Mewa on 2015-10-10.
  */
-public abstract class Vehicle extends GameObject implements Drawable {
+public abstract class Vehicle extends GameObject implements Drawable, Comparable<Vehicle> {
     private static AtomicInteger idGenerator = new AtomicInteger();
 
     private int mId = idGenerator.getAndIncrement();
@@ -22,6 +23,7 @@ public abstract class Vehicle extends GameObject implements Drawable {
     private Thread mVehicleThread;
     private int mLocationsTraversed = 0;
     private int direction;
+    private final int[] mRouteLock = new int[0];
 
     public Vehicle() {
         this(null);
@@ -34,15 +36,22 @@ public abstract class Vehicle extends GameObject implements Drawable {
             public void run() {
                 while (true) {
                     if (mRoute != null) {
-                        synchronized (mRoute) {
+                        synchronized (mRouteLock) {
                             if (!mRoute.collidesWithNext(Vehicle.this, getDirection())) {
                                 boolean isAtDestination = false;
+                                Localizable nextLocation = mRoute.getNextStop(Vehicle.this);
+                                double radius = nextLocation instanceof Crossing ? 1 : 0.5;
                                 // travel
-                                if (World.getInstance().checkCollision(getLocation(), mRoute.getNextStop(Vehicle.this))) {
+                                if (World.getInstance().collides(getLocation(), nextLocation, radius)) {
+                                    if (nextLocation instanceof Crossing) {
+                                        Crossing crossing = (Crossing) nextLocation;
+                                        crossing.accept(Vehicle.this);
+                                        Main.logger.log(Logger.VERBOSE, "vehicle crossing " + Vehicle.this);
+                                    }
                                     isAtDestination = mRoute.incStop(Vehicle.this, getDirection());
                                 }
                                 if (!isAtDestination) {
-                                    Location nextLocation = mRoute.getNextStop(Vehicle.this);
+                                    nextLocation = mRoute.getNextStop(Vehicle.this);
                                     travelTo(nextLocation);
                                 } else {
                                     mRoute.getDestination(getDirection()).receive(Vehicle.this);
@@ -66,7 +75,7 @@ public abstract class Vehicle extends GameObject implements Drawable {
         mVehicleThread.start();
     }
 
-    protected abstract void travelTo(Location nextLocation);
+    protected abstract void travelTo(Localizable nextLocation);
 
     @Override
     public String toString() {
@@ -87,24 +96,20 @@ public abstract class Vehicle extends GameObject implements Drawable {
     }
 
     public void setRoute(Route route, int direction) {
-        Main.logger.log(Logger.VERBOSE, this + " has been assigned route " + route + ":" + direction);
         this.setDirection(direction);
         mLocationsTraversed = 0;
-        if (route == null) {
-            synchronized (mRoute) {
+        synchronized (mRouteLock) {
+            if (route == null) {
                 mRoute.removeVehicle(direction, this);
-            }
-        }
-        if (mRoute != null) {
-            synchronized (mRoute) {
-                this.mRoute = route;
-            }
-        } else {
-            mRoute = route;
-        }
-        if (mRoute != null) {
-            synchronized (mRoute) {
-                mRoute.addVehicle(direction, this);
+                mRoute = null;
+            } else {
+                if (mRoute != null) {
+                    route.addVehicle(direction, this);
+                    this.mRoute = route;
+                } else {
+                    route.addVehicle(direction, this);
+                    mRoute = route;
+                }
             }
         }
     }
@@ -115,5 +120,10 @@ public abstract class Vehicle extends GameObject implements Drawable {
 
     public void setDirection(int direction) {
         this.direction = direction;
+    }
+
+    @Override
+    public int compareTo(Vehicle o) {
+        return o.getId() - getId();
     }
 }

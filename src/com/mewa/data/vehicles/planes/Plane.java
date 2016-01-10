@@ -1,6 +1,7 @@
 package com.mewa.data.vehicles.planes;
 
 import com.mewa.Main;
+import com.mewa.data.Localizable;
 import com.mewa.data.location.Location;
 import com.mewa.data.location.Route;
 import com.mewa.data.location.World;
@@ -22,10 +23,10 @@ public abstract class Plane extends Vehicle implements Airborne {
         } else {
             double diag = 0;
             for (int i = 0; i < route.getStops().size() - 1; ++i) {
-                Location location1 = route.getStops().get(i);
-                Location location2 = route.getStops().get(i + 1);
-                double dx = location2.getX() - location1.getX();
-                double dy = location2.getY() - location1.getY();
+                Localizable location1 = route.getStops().get(i);
+                Localizable location2 = route.getStops().get(i + 1);
+                double dx = location2.getLocation().getX() - location1.getLocation().getX();
+                double dy = location2.getLocation().getY() - location1.getLocation().getY();
                 diag += Math.sqrt(dx * dx + dy * dy);
             }
             setFuel(1.5 * diag);
@@ -62,12 +63,18 @@ public abstract class Plane extends Vehicle implements Airborne {
     }
 
     @Override
-    protected void travelTo(Location nextLocation) {
-        double dx = nextLocation.getX() - getLocation().getX();
-        double dy = nextLocation.getY() - getLocation().getY();
+    protected void travelTo(Localizable nextLocation) {
+        double dx = nextLocation.getLocation().getX() - getLocation().getX();
+        double dy = nextLocation.getLocation().getY() - getLocation().getY();
+
+        double len = Math.sqrt(dx * dx + dy * dy);
+
+        dx /= len;
+        dy /= len;
+
         double rx = dx * getSpeed();
-        double nextX = getLocation().getX() + rx;
         double ry = dy * getSpeed();
+        double nextX = getLocation().getX() + rx;
         double nextY = getLocation().getY() + ry;
         nextX = Math.min(Math.max(nextX, 0), World.getInstance().getWidth());
         nextY = Math.min(Math.max(nextY, 0), World.getInstance().getHeight());
@@ -77,7 +84,7 @@ public abstract class Plane extends Vehicle implements Airborne {
 
     @Override
     public double getSpeed() {
-        return 0.0005;
+        return 0.005;
     }
 
     @Override

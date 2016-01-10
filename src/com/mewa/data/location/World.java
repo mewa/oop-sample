@@ -2,13 +2,13 @@ package com.mewa.data.location;
 
 import com.mewa.Main;
 import com.mewa.data.GameObject;
+import com.mewa.data.Localizable;
 import com.mewa.data.ports.*;
 import com.mewa.data.vehicles.Vehicle;
 import com.mewa.data.vehicles.planes.PassengerPlane;
 import com.mewa.data.vehicles.ships.AircraftCarrier;
 import com.mewa.data.vehicles.ships.CruiseShip;
 import com.mewa.ui.Drawable;
-import com.mewa.ui.controllers.GUIMain;
 import com.mewa.utils.i.Logger;
 import javafx.application.Platform;
 import javafx.scene.canvas.GraphicsContext;
@@ -59,9 +59,9 @@ public class World {
         );
         spawnPorts();
         //spawnVehicles();
-        while (mCrossings.size() < 16) {
+        while (mCrossings.size() < 10) {
             Crossing crossing = new Crossing();
-            spawnAtRandomLocation(this, crossing);
+            spawnAtRandomLocation(this, crossing, 2.5);
             mCrossings.add(crossing);
         }
         spawnRoutes(mMilitaryAirports);
@@ -98,13 +98,13 @@ public class World {
     }
 
     private void makeRoute(Route route, AbstractPort location1, AbstractPort location2) {
-        route.getStops().add(location1.getLocation());
-        route.getStops().add(closestCrossing(location1.getLocation(), location2.getLocation()));
-        route.getStops().add(location2.getLocation());
+        route.add(location1);
+        route.add(closestCrossing(location1.getLocation(), location2.getLocation()));
+        route.add(location2);
         registerGameObject(route);
     }
 
-    private Location closestCrossing(Location location1, Location location2) {
+    private Localizable closestCrossing(Location location1, Location location2) {
         double distance = location1.distanceTo(mCrossings.get(0).getLocation()) + location2.distanceTo(mCrossings.get(0).getLocation());
         Crossing closest = mCrossings.get(0);
         for (Crossing crossing : mCrossings) {
@@ -114,11 +114,11 @@ public class World {
                 closest = crossing;
             }
         }
-        return closest.getLocation();
+        return closest;
     }
 
     private void spawnPorts() {
-        while (mMilitaryAirports.size() < 5 || mCivilAirports.size() < 5 || mCivilNavalPorts.size() + mMilitaryNavalPorts.size() < 5) {
+        while (mMilitaryAirports.size() < 3 || mCivilAirports.size() < 5 || mCivilNavalPorts.size() + mMilitaryNavalPorts.size() < 5) {
             AbstractPort port;
             switch ((int) (Math.random() * 4)) {
                 case 0:
@@ -138,7 +138,7 @@ public class World {
                     mCivilAirports.add(port);
                     break;
             }
-            World.spawnAtRandomLocation(this, port);
+            World.spawnAtRandomLocation(this, port, 1.5);
             getPorts().add(port);
         }
     }
@@ -163,6 +163,10 @@ public class World {
     }
 
     private static void spawnAtRandomLocation(World world, GameObject gameObject) {
+        spawnAtRandomLocation(world, gameObject, 0.5);
+    }
+
+    private static void spawnAtRandomLocation(World world, GameObject gameObject, double radius) {
         Location location = new Location();
         gameObject.setLocation(location);
         boolean found = false;
@@ -171,25 +175,35 @@ public class World {
             double y = Math.random() * (world.mNortheast.getY() - world.mSouthwest.getY());
             location.setX(x);
             location.setY(y);
-            found = !world.checkCollision(gameObject);
+            found = !world.collides(gameObject, radius);
         }
         world.registerGameObject(gameObject);
         Main.logger.log(Logger.VERBOSE, "Spawning " + gameObject + " @ " + gameObject.getLocation());
     }
 
-    private boolean checkCollision(GameObject gameObject1) {
+    private boolean collides(GameObject gameObject1) {
+        return collides(gameObject1, 0.5);
+    }
+
+    private boolean collides(GameObject gameObject1, double radius) {
         synchronized (mGameObjects) {
             for (GameObject gameObject2 : mGameObjects) {
                 if (gameObject1 != gameObject2) {
-                    return checkCollision(gameObject1.getLocation(), gameObject2.getLocation());
+                    if (collides(gameObject1.getLocation(), gameObject2.getLocation(), radius))
+                        return true;
                 }
             }
         }
         return false;
     }
 
-    public boolean checkCollision(Location location1, Location location2) {
-        if (Math.abs(location1.getX() - location2.getX()) < 0.6 && Math.abs(location1.getY() - location2.getY()) < 0.6)
+    public boolean collides(Localizable localizable1, Localizable localizable2) {
+        return collides(localizable1, localizable2, 0.5);
+    }
+
+    public boolean collides(Localizable location1, Localizable location2, double radius) {
+        if (Math.abs(location1.getLocation().getX() - location2.getLocation().getX()) < radius
+                && Math.abs(location1.getLocation().getY() - location2.getLocation().getY()) < radius)
             return true;
         return false;
     }
@@ -249,7 +263,7 @@ public class World {
             crossing.draw(worldGC);
         }
 
-        final Thread thread = new Thread() {
+        final Thread thread = new Thread("World-Draw-Dispatcher-Thread") {
 
             AtomicBoolean finishedPass = new AtomicBoolean(true);
 

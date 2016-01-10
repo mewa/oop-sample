@@ -2,23 +2,23 @@ package com.mewa.data.location;
 
 import com.mewa.Main;
 import com.mewa.data.GameObject;
+import com.mewa.data.Localizable;
 import com.mewa.data.ports.AbstractPort;
-import com.mewa.data.ports.HasPort;
 import com.mewa.data.vehicles.Vehicle;
 import com.mewa.ui.Drawable;
 import com.mewa.ui.controllers.GUIMain;
 import com.mewa.utils.i.Logger;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by Mewa on 2015-10-10.
  */
 public class Route extends GameObject implements Drawable {
-    private final List<Location> locations = Collections.synchronizedList(new ArrayList<Location>());
+    private final List<Localizable> locations = Collections.synchronizedList(new ArrayList<Localizable>());
     private final AbstractPort origin;
     private final AbstractPort destination;
 
@@ -32,7 +32,7 @@ public class Route extends GameObject implements Drawable {
         destination = port2;
     }
 
-    public List<Location> getStops() {
+    public List<Localizable> getStops() {
         return locations;
     }
 
@@ -56,9 +56,9 @@ public class Route extends GameObject implements Drawable {
         gc.setStroke(Color.RED);
         gc.setLineWidth(1.5);
         Main.logger.log(Logger.VERBOSE, "draw " + this + " " + locations + " on " + gc);
-        gc.moveTo((locations.get(0).getX() + 0.25 + Math.random() / 2) * GUIMain.CELL_SIZE, (locations.get(0).getY() + 0.25 + Math.random() / 2) * GUIMain.CELL_SIZE);
+        gc.moveTo((locations.get(0).getLocation().getX() + 0.25 + Math.random() / 2) * GUIMain.CELL_SIZE, (locations.get(0).getLocation().getY() + 0.25 + Math.random() / 2) * GUIMain.CELL_SIZE);
         for (int i = 0; i < locations.size() - 1; ++i) {
-            gc.lineTo((locations.get(i + 1).getX() + 0.25 + Math.random() / 2) * GUIMain.CELL_SIZE, (locations.get(i + 1).getY() + 0.25 + Math.random() / 2) * GUIMain.CELL_SIZE);
+            gc.lineTo((locations.get(i + 1).getLocation().getX() + 0.25 + Math.random() / 2) * GUIMain.CELL_SIZE, (locations.get(i + 1).getLocation().getY() + 0.25 + Math.random() / 2) * GUIMain.CELL_SIZE);
         }
         gc.stroke();
     }
@@ -74,19 +74,17 @@ public class Route extends GameObject implements Drawable {
     }
 
     public void addVehicle(int direction, Vehicle vehicle) {
-        if (direction == 1) {
-            synchronized (normalDirection) {
-                synchronized (nextStopsMap) {
+        synchronized (nextStopsMap) {
+            if (direction == 1) {
+                synchronized (normalDirection) {
                     nextStopsMap.put(vehicle, 1);
+                    normalDirection.add(vehicle);
                 }
-                normalDirection.add(vehicle);
-            }
-        } else if (direction == -1) {
-            synchronized (reverseDirection) {
-                synchronized (nextStopsMap) {
+            } else if (direction == -1) {
+                synchronized (reverseDirection) {
                     nextStopsMap.put(vehicle, locations.size() - 1);
+                    reverseDirection.add(vehicle);
                 }
-                reverseDirection.add(vehicle);
             }
         }
     }
@@ -96,7 +94,7 @@ public class Route extends GameObject implements Drawable {
             synchronized (normalDirection) {
                 for (int i = normalDirection.size() - 1; i > 0; --i) {
                     if (normalDirection.get(i) == vehicle) {
-                        return World.getInstance().checkCollision(vehicle.getLocation(), normalDirection.get(i - 1).getLocation());
+                        return World.getInstance().collides(vehicle.getLocation(), normalDirection.get(i - 1).getLocation());
                     }
                 }
             }
@@ -104,7 +102,7 @@ public class Route extends GameObject implements Drawable {
             synchronized (reverseDirection) {
                 for (int i = reverseDirection.size() - 1; i > 0; --i) {
                     if (reverseDirection.get(i) == vehicle) {
-                        return World.getInstance().checkCollision(vehicle.getLocation(), reverseDirection.get(i - 1).getLocation());
+                        return World.getInstance().collides(vehicle.getLocation(), reverseDirection.get(i - 1).getLocation());
                     }
                 }
             }
@@ -124,9 +122,16 @@ public class Route extends GameObject implements Drawable {
         }
     }
 
-    public Location getNextStop(Vehicle vehicle) {
+    public Localizable getNextStop(Vehicle vehicle) {
         synchronized (nextStopsMap) {
-            return locations.get(nextStopsMap.get(vehicle));
+            boolean contains = nextStopsMap.containsKey(vehicle);
+            int i;
+            if (contains) {
+                i = nextStopsMap.get(vehicle);
+            } else {
+                throw new NullPointerException("doesn't contain vehicle " + vehicle);
+            }
+            return locations.get(i);
         }
     }
 
@@ -141,6 +146,13 @@ public class Route extends GameObject implements Drawable {
                 nextStopsMap.put(vehicle, --pos);
                 return pos < 0;
             }
+        }
+    }
+
+
+    public void add(Localizable localizable) {
+        synchronized (locations) {
+            locations.add(localizable);
         }
     }
 }

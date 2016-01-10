@@ -2,6 +2,7 @@ package com.mewa.ui.controllers;
 
 import com.mewa.data.GameObject;
 import com.mewa.data.GameObjectUpdateListener;
+import com.mewa.data.Localizable;
 import com.mewa.data.location.Location;
 import com.mewa.data.location.Route;
 import com.mewa.data.ports.*;
@@ -55,8 +56,13 @@ public class InfoPane {
                 addButton("Nowy samolot", new OnClickListener() {
                     @Override
                     public void onClick() {
-                        PassengerPlane plane = new PassengerPlane(10);
-                        civilAirport.depart(plane);
+                        new Thread() {
+                            @Override
+                            public void run() {
+                                PassengerPlane plane = new PassengerPlane(10);
+                                civilAirport.depart(plane);
+                            }
+                        }.start();
                     }
                 });
             }
@@ -66,16 +72,26 @@ public class InfoPane {
                 addButton("Nowy wycieczkowiec", new OnClickListener() {
                     @Override
                     public void onClick() {
-                        CruiseShip cs = new CruiseShip(1234);
-                        navalPort.depart(cs);
+                        new Thread() {
+                            @Override
+                            public void run() {
+                                CruiseShip cs = new CruiseShip(1234);
+                                navalPort.depart(cs);
+                            }
+                        }.start();
                     }
                 });
             } else if (navalPort instanceof MilitaryNavalPort) {
                 addButton("Nowy lotniskowiec", new OnClickListener() {
                     @Override
                     public void onClick() {
-                        AircraftCarrier ac = new AircraftCarrier();
-                        navalPort.depart(ac);
+                        new Thread() {
+                            @Override
+                            public void run() {
+                                AircraftCarrier ac = new AircraftCarrier();
+                                navalPort.depart(ac);
+                            }
+                        }.start();
                     }
                 });
             }
@@ -102,8 +118,8 @@ public class InfoPane {
 
     public void setRoute(Route route) {
         root.setText(route.toString());
-        for (Location location : route.getStops()) {
-            addRow("Stop", String.format("%.2f x %.2f", location.getX(), location.getY()));
+        for (Localizable location : route.getStops()) {
+            addRow(location.toString(), String.format("%.2f x %.2f", location.getLocation().getX(), location.getLocation().getY()));
         }
     }
 
@@ -112,6 +128,7 @@ public class InfoPane {
         root.setText(vehicle.toString());
         addRow("Location", String.format("%.2f x %.2f", vehicle.getLocation().getX(), vehicle.getLocation().getY()));
         addRow("Route", vehicle.getRoute() + "");
+        addRow("Next stop", vehicle.getRoute().getNextStop(vehicle) + "");
         addRow("Direction", vehicle.getDirection() + "");
         if (vehicle instanceof Plane) {
             Plane plane = (Plane) vehicle;
@@ -133,6 +150,7 @@ public class InfoPane {
                             if (gameObject instanceof Vehicle) {
                                 Vehicle v = (Vehicle) gameObject;
                                 propertyMap.get("Route").setText(v.getRoute() + "");
+                                propertyMap.get("Next stop").setText(v.getRoute() != null ? v.getRoute().getNextStop(v) + "" : "");
                                 propertyMap.get("Direction").setText(v.getDirection() + "");
                             }
                             if (gameObject instanceof Plane) {

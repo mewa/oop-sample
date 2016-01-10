@@ -6,7 +6,7 @@ import com.mewa.ui.controllers.GUIMain;
 /**
  * Created by Mewa on 2015-12-19.
  */
-public abstract class GameObject {
+public abstract class GameObject implements Localizable {
     private Location mLocation;
     private GameObjectUpdateListener listener;
 
@@ -33,6 +33,7 @@ public abstract class GameObject {
         listener = gameObjectUpdateListener;
     }
 
+    @Override
     public Location getLocation() {
         return mLocation;
     }

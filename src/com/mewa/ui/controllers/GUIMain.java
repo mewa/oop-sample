@@ -1,6 +1,6 @@
 package com.mewa.ui.controllers;
 
-import com.mewa.Main;
+import com.mewa.data.Localizable;
 import com.mewa.data.location.Location;
 import com.mewa.data.location.Route;
 import com.mewa.data.location.World;
@@ -98,14 +98,14 @@ public class GUIMain {
         logger.log(Logger.VERBOSE, "clickLocation: %s", clickLocation);
         if (event.getButton().equals(MouseButton.PRIMARY)) {
             for (AbstractPort port : world.getPorts()) {
-                if (world.checkCollision(port.getLocation(), clickLocation)) {
+                if (world.collides(port.getLocation(), clickLocation)) {
                     logger.log(Logger.VERBOSE, "Port clicked: %s", port);
                     port.onClick(this);
                     return;
                 }
             }
             for (Vehicle vehicle : world.getVehicles()) {
-                if (world.checkCollision(vehicle.getLocation(), clickLocation)) {
+                if (world.collides(vehicle.getLocation(), clickLocation)) {
                     logger.log(Logger.VERBOSE, "Vehicle clicked: %s", vehicle);
                     vehicle.onClick(this);
                     return;
@@ -113,8 +113,8 @@ public class GUIMain {
             }
         } else if (event.getButton().equals(MouseButton.SECONDARY)) {
             for (Route route : world.getRoutes()) {
-                for (Location stop : route.getStops()) {
-                    if (world.checkCollision(stop, clickLocation)) {
+                for (Localizable stop : route.getStops()) {
+                    if (world.collides(stop, clickLocation)) {
                         logger.log(Logger.VERBOSE, "Route clicked: %s", route);
                         route.onClick(this);
                         return;

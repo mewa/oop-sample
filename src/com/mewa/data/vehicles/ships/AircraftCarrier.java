@@ -35,22 +35,32 @@ public class AircraftCarrier extends Ship implements Military, HasPort {
 
     @Override
     public void setRoute(final Route route, int direction) {
-        new Thread() {
-            @Override
-            public void run() {
-                int pos = (int) (Math.random() * (World.getInstance().getMilitaryAirports().size() - 1));
-                MilitaryPlane militaryPlane = new MilitaryPlane();
-                militaryPlane.setLocation(new Location(getLocation().getX(), getLocation().getY()));
-                Map.Entry<Route, Integer> r = World.getInstance().getMilitaryAirports().get(pos).getRandomRoute();
-                militaryPlane.setRoute(r.getKey(), r.getValue());
+        if (route != null) {
+            new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        sleep((long) (3000 + Math.random() * 3000));
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    int pos = (int) (Math.random() * (World.getInstance().getMilitaryAirports().size() - 1));
+                    MilitaryPlane militaryPlane = new MilitaryPlane();
+                    militaryPlane.setLocation(new Location(getLocation().getX(), getLocation().getY()));
+                    Map.Entry<Route, Integer> r = World.getInstance().getMilitaryAirports().get(pos).getRandomRoute();
+                    militaryPlane.setRoute(r.getKey(), r.getValue());
 
-                double dx = route.getOrigin(r.getValue()).getLocation().getX() - getLocation().getX();
-                double dy = route.getOrigin(r.getValue()).getLocation().getY() - getLocation().getY();
+                    double dx, dy;
+                    synchronized (route) {
+                        dx = route.getOrigin(r.getValue()).getLocation().getX() - getLocation().getX();
+                        dy = route.getOrigin(r.getValue()).getLocation().getY() - getLocation().getY();
+                    }
 
-                militaryPlane.setFuel(militaryPlane.getFuel() + Math.sqrt(dx * dx + dy * dy));
-                World.getInstance().registerGameObject(militaryPlane);
-            }
-        }.start();
+                    militaryPlane.setFuel(militaryPlane.getFuel() + Math.sqrt(dx * dx + dy * dy));
+                    World.getInstance().registerGameObject(militaryPlane);
+                }
+            }.start();
+        }
         super.setRoute(route, direction);
     }
 

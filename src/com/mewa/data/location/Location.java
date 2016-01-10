@@ -1,6 +1,7 @@
 package com.mewa.data.location;
 
 import com.mewa.Main;
+import com.mewa.data.Localizable;
 import com.mewa.data.type.Airborne;
 import com.mewa.data.type.Naval;
 import com.mewa.data.vehicles.Vehicle;
@@ -15,7 +16,7 @@ import java.util.Iterator;
 /**
  * Created by Mewa on 2015-10-10.
  */
-public class Location implements Comparable<Location>, Drawable {
+public class Location implements Comparable<Location>, Drawable, Localizable {
     private double mX;
     private double mY;
 
@@ -107,5 +108,21 @@ public class Location implements Comparable<Location>, Drawable {
     @Override
     public void draw(GraphicsContext gc) {
 
+    }
+
+    @Override
+    public Location getLocation() {
+        return this;
+    }
+
+    @Override
+    public void setLocation(double x, double y) {
+        setX(x);
+        setY(y);
+    }
+
+    @Override
+    public void setLocation(Location location) {
+        setLocation(location.getX(), location.getY());
     }
 }
