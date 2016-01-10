@@ -16,7 +16,11 @@ import javafx.scene.paint.Color;
  */
 public class CivilAirport extends Airport {
     public CivilAirport() {
-        super((int) (Math.random() * 10 + 1));
+        this((int) (Math.random() * 10 + 1));
+    }
+
+    public CivilAirport(int capacity) {
+        super(capacity);
     }
 
     @Override

@@ -14,7 +14,11 @@ import javafx.scene.paint.Color;
  */
 public class MilitaryAirport extends Airport {
     public MilitaryAirport() {
-        super((int) (Math.random() * 10 + 1));
+        this((int) (Math.random() * 10 + 1));
+    }
+
+    public MilitaryAirport(int capacity) {
+        super(capacity);
     }
 
     @Override

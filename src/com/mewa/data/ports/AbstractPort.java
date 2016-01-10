@@ -21,13 +21,13 @@ public abstract class AbstractPort extends GameObject implements HasPort, Drawab
 
     private int mId = idGenerator.getAndIncrement();
 
-    private final List<Vehicle> vehicles = Collections.synchronizedList(new ArrayList<Vehicle>());
+    private final List<Vehicle> mVehicles = Collections.synchronizedList(new ArrayList<Vehicle>());
 
     private final Map<Route, Integer> mRoutes = Collections.synchronizedMap(new HashMap<Route, Integer>());
 
     public boolean receive(final Vehicle vehicle) {
-        synchronized (vehicles) {
-            vehicles.add(vehicle);
+        synchronized (mVehicles) {
+            mVehicles.add(vehicle);
         }
         new Thread(vehicle + "-departure-" + this) {
             @Override
@@ -46,16 +46,22 @@ public abstract class AbstractPort extends GameObject implements HasPort, Drawab
         return true;
     }
 
+    /**
+     * Departs vehicle from this port
+     * @param vehicle to depart
+     * @return true if vehicle was in the port, false if it just spawned here
+     */
     public boolean depart(Vehicle vehicle) {
-        synchronized (vehicles) {
-            vehicles.remove(vehicle);
+        boolean wasInPort;
+        synchronized (mVehicles) {
+            wasInPort = mVehicles.remove(vehicle);
         }
         World.getInstance().registerGameObject(vehicle);
         vehicle.setLocation(new Location(getLocation()));
         Map.Entry<Route, Integer> item = getRandomRoute();
         vehicle.setRoute(item.getKey(), item.getValue());
         Main.logger.log(Logger.ERROR, vehicle + " departed from " + this);
-        return true;
+        return wasInPort;
     }
 
     public Map.Entry<Route, Integer> getRandomRoute() {
@@ -73,6 +79,10 @@ public abstract class AbstractPort extends GameObject implements HasPort, Drawab
             }
             return item;
         }
+    }
+
+    public List<Vehicle> getVehicles() {
+        return mVehicles;
     }
 
     public Map<Route, Integer> getRoutes() {

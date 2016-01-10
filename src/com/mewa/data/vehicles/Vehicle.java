@@ -40,7 +40,7 @@ public abstract class Vehicle extends GameObject implements Drawable, Comparable
                             if (!mRoute.collidesWithNext(Vehicle.this, getDirection())) {
                                 boolean isAtDestination = false;
                                 Localizable nextLocation = mRoute.getNextStop(Vehicle.this);
-                                double radius = nextLocation instanceof Crossing ? 1 : 0.5;
+                                double radius = nextLocation instanceof Crossing ? Crossing.RADIUS : 0.5;
                                 // travel
                                 if (World.getInstance().collides(getLocation(), nextLocation, radius)) {
                                     if (nextLocation instanceof Crossing) {

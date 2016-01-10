@@ -59,7 +59,7 @@ public class World {
         );
         spawnPorts();
         //spawnVehicles();
-        while (mCrossings.size() < 10) {
+        while (mCrossings.size() < 4) {
             Crossing crossing = new Crossing();
             spawnAtRandomLocation(this, crossing, 2.5);
             mCrossings.add(crossing);
@@ -120,9 +120,10 @@ public class World {
     private void spawnPorts() {
         while (mMilitaryAirports.size() < 3 || mCivilAirports.size() < 5 || mCivilNavalPorts.size() + mMilitaryNavalPorts.size() < 5) {
             AbstractPort port;
+            int capacity = (int) (5 + Math.random() * 10);
             switch ((int) (Math.random() * 4)) {
                 case 0:
-                    port = new MilitaryAirport();
+                    port = new MilitaryAirport(capacity);
                     mMilitaryAirports.add(port);
                     break;
                 case 1:
@@ -134,7 +135,7 @@ public class World {
                     mCivilNavalPorts.add(port);
                     break;
                 default:
-                    port = new CivilAirport();
+                    port = new CivilAirport(capacity);
                     mCivilAirports.add(port);
                     break;
             }

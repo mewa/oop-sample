@@ -13,6 +13,7 @@ import javafx.scene.paint.Color;
  * Created by Mewa on 2015-10-12.
  */
 public class MilitaryNavalPort extends NavalPort {
+
     @Override
     public boolean receive(Vehicle vehicle) {
         if (vehicle instanceof Military) {

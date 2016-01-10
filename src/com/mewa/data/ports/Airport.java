@@ -12,7 +12,9 @@ import com.mewa.utils.i.Logger;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
+import java.util.List;
 import java.util.ListIterator;
+import java.util.concurrent.Semaphore;
 
 /**
  * Created by Mewa on 2015-10-12.
@@ -20,9 +22,30 @@ import java.util.ListIterator;
 public class Airport extends AbstractPort {
 
     private final int capacity;
+    private final Semaphore capacitySemaphore;
 
     public Airport(int capacity) {
         this.capacity = capacity;
+        this.capacitySemaphore = new Semaphore(capacity);
+    }
+
+    @Override
+    public boolean receive(Vehicle vehicle) {
+        try {
+            capacitySemaphore.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return super.receive(vehicle);
+    }
+
+    @Override
+    public boolean depart(Vehicle vehicle) {
+        boolean wasInPort = super.depart(vehicle);
+        if (wasInPort) {
+            capacitySemaphore.release();
+        }
+        return wasInPort;
     }
 
     @Override
