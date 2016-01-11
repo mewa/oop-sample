@@ -14,6 +14,7 @@ import javafx.application.Platform;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -21,7 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Created by Mewa on 2015-10-12.
  */
-public class World {
+public class World implements Serializable{
     private static World instance;
     private static final int kWidth = 25;
     private static final int kHeight = 25;
@@ -342,5 +343,17 @@ public class World {
 
     public List<AbstractPort> getMilitaryAirports() {
         return mMilitaryAirports;
+    }
+
+    public CivilAirport getClosestCivilAirport(Localizable localizable) {
+        Collection<Localizable> collection = new ArrayList<Localizable>();
+        collection.addAll(mCivilAirports);
+        return (CivilAirport) localizable.getLocation().closest(collection);
+    }
+
+    public MilitaryAirport getClosestMilitaryAirport(Localizable localizable) {
+        Collection<Localizable> collection = new ArrayList<Localizable>();
+        collection.addAll(mMilitaryAirports);
+        return (MilitaryAirport) localizable.getLocation().closest(collection);
     }
 }

@@ -9,6 +9,8 @@ import com.mewa.data.vehicles.Vehicle;
 import com.mewa.ui.Drawable;
 import com.mewa.ui.controllers.GUIMain;
 import com.mewa.utils.i.Logger;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -25,7 +27,12 @@ public abstract class AbstractPort extends GameObject implements HasPort, Drawab
 
     private final Map<Route, Integer> mRoutes = Collections.synchronizedMap(new HashMap<Route, Integer>());
 
-    public boolean receive(final Vehicle vehicle) {
+    /**
+     * Przyjmij pojazd
+     *
+     * @param vehicle
+     */
+    public void receive(final Vehicle vehicle) {
         synchronized (mVehicles) {
             mVehicles.add(vehicle);
         }
@@ -43,13 +50,14 @@ public abstract class AbstractPort extends GameObject implements HasPort, Drawab
             }
         }.start();
         Main.logger.log(Logger.ERROR, vehicle + " arrived at " + this);
-        return true;
+        update();
     }
 
     /**
-     * Departs vehicle from this port
+     * Odpraw pojazd
+     *
      * @param vehicle to depart
-     * @return true if vehicle was in the port, false if it just spawned here
+     * @return true jeśli pojazd był w porcie, false wpp
      */
     public boolean depart(Vehicle vehicle) {
         boolean wasInPort;
@@ -61,6 +69,7 @@ public abstract class AbstractPort extends GameObject implements HasPort, Drawab
         Map.Entry<Route, Integer> item = getRandomRoute();
         vehicle.setRoute(item.getKey(), item.getValue());
         Main.logger.log(Logger.ERROR, vehicle + " departed from " + this);
+        update();
         return wasInPort;
     }
 
@@ -70,7 +79,7 @@ public abstract class AbstractPort extends GameObject implements HasPort, Drawab
             int pos = Math.min((int) (Math.random() * next.size()), next.size());
             Iterator<Map.Entry<Route, Integer>> it = next.iterator();
             Map.Entry<Route, Integer> item = null;
-            Main.logger.log(Logger.VERBOSE, "routes: " + next + " pos: " + pos);
+            //Main.logger.log(Logger.VERBOSE, "routes: " + next + " pos: " + pos);
             for (int i = 0; it.hasNext(); ++i) {
                 item = it.next();
                 if (pos == i) {
@@ -81,10 +90,16 @@ public abstract class AbstractPort extends GameObject implements HasPort, Drawab
         }
     }
 
+    /**
+     * @return lista pojazdów w porcie
+     */
     public List<Vehicle> getVehicles() {
         return mVehicles;
     }
 
+    /**
+     * @return lista tras wychodzących z tego portu
+     */
     public Map<Route, Integer> getRoutes() {
         return mRoutes;
     }
@@ -108,7 +123,19 @@ public abstract class AbstractPort extends GameObject implements HasPort, Drawab
         guiMain.showPortPanel(this);
     }
 
+    /**
+     * dodaje ścieżkę do listy ścieżek lotniska
+     *
+     * @param route
+     * @param direction
+     */
     public void addRoute(Route route, int direction) {
         mRoutes.put(route, direction);
+    }
+
+    @Override
+    public void draw(GraphicsContext gc) {
+        gc.setFill(Color.rgb(200, 20, 20, 0.5));
+        gc.fillText("" + getId(), getLocation().getX() * GUIMain.CELL_SIZE, getLocation().getY() * GUIMain.CELL_SIZE);
     }
 }

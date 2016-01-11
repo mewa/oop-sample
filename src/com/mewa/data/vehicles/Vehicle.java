@@ -104,6 +104,7 @@ public abstract class Vehicle extends GameObject implements Drawable, Comparable
                 mRoute = null;
             } else {
                 if (mRoute != null) {
+                    mRoute.removeVehicle(direction, this);
                     route.addVehicle(direction, this);
                     this.mRoute = route;
                 } else {

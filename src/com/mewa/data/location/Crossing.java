@@ -22,7 +22,7 @@ import java.util.concurrent.Semaphore;
  */
 public class Crossing extends GameObject implements Drawable {
 
-    public static final double RADIUS = 0.5;
+    public static final double RADIUS = 1;
     private static final Color BG_COLOR = new Color(0xD4 / 0xFF, 0x6A / 0xFF, 0x6A / 0xFF, 0.1);
     private final Semaphore mWaterLock = new Semaphore(1);
     private final Semaphore mAirLock = new Semaphore(1);

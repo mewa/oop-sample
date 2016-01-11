@@ -79,15 +79,16 @@ public class Location implements Comparable<Location>, Drawable, Localizable {
         return Double.compare(getY(), o.getY());
     }
 
-    public Location closest(Collection<Location> locations) {
-        Iterator<Location> it = locations.iterator();
-        Location closestLocation = it.next();
-        double minDistance = closestLocation.distanceTo(this);
+    public Localizable closest(Collection<Localizable> locations) {
+        Iterator<Localizable> it = locations.iterator();
+        Localizable closestLocation = it.next();
+        double minDistance = closestLocation.getLocation().distanceTo(this);
         while (it.hasNext()) {
-            Location currentLocation = it.next();
-            double distance = currentLocation.distanceTo(this);
+            Localizable currentLocation = it.next();
+            double distance = currentLocation.getLocation().distanceTo(this);
             if (distance < minDistance) {
                 closestLocation = currentLocation;
+                minDistance = distance;
             }
         }
         return closestLocation;

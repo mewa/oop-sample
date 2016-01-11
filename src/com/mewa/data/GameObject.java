@@ -29,7 +29,7 @@ public abstract class GameObject implements Localizable {
         update();
     }
 
-    public void setLocationUpdateListener(GameObjectUpdateListener gameObjectUpdateListener) {
+    public void setGameObjectListener(GameObjectUpdateListener gameObjectUpdateListener) {
         listener = gameObjectUpdateListener;
     }
 

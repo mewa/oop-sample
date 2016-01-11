@@ -131,7 +131,7 @@ public class Route extends GameObject implements Drawable {
             } else {
                 throw new NullPointerException("doesn't contain vehicle " + vehicle);
             }
-            return locations.get(i);
+            return i >= 0 && i < locations.size() ? locations.get(i) : null;
         }
     }
 

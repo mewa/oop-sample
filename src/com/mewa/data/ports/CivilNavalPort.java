@@ -1,26 +1,31 @@
 package com.mewa.data.ports;
 
-import com.mewa.Main;
+import com.mewa.data.passengers.Passenger;
 import com.mewa.data.type.Civil;
 import com.mewa.data.vehicles.Vehicle;
-import com.mewa.ui.Drawable;
 import com.mewa.ui.controllers.GUIMain;
-import com.mewa.utils.i.Logger;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by Mewa on 2015-10-12.
  */
-public class CivilNavalPort extends NavalPort {
+public class CivilNavalPort extends NavalPort implements Civil {
+    private final List<Passenger> mPassengers = Collections.synchronizedList(new ArrayList<Passenger>());
+
     @Override
-    public boolean receive(Vehicle vehicle) {
-        if (vehicle instanceof Civil) {
-            return super.receive(vehicle);
-        } else {
-            Main.logger.log(Logger.VERBOSE, String.format("%s denied %s: only civil vehicles are permitted", this, vehicle));
-            return false;
-        }
+    public void receive(Vehicle vehicle) {
+        super.receive(vehicle);
+    }
+
+    @Override
+    public boolean depart(Vehicle vehicle) {
+        return super.depart(vehicle);
     }
 
     @Override
@@ -33,4 +38,16 @@ public class CivilNavalPort extends NavalPort {
                 (1 - 2 * inset) * GUIMain.CELL_SIZE);
         super.draw(gc);
     }
+
+
+    @Override
+    public int getNumberOfPassengers() {
+        return 0;
+    }
+
+    @Override
+    public Collection<Passenger> getPassengers() {
+        return mPassengers;
+    }
+
 }

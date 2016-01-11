@@ -3,7 +3,6 @@ package com.mewa.data.ports;
 import com.mewa.Main;
 import com.mewa.data.type.Military;
 import com.mewa.data.vehicles.Vehicle;
-import com.mewa.ui.Drawable;
 import com.mewa.ui.controllers.GUIMain;
 import com.mewa.utils.i.Logger;
 import javafx.scene.canvas.GraphicsContext;
@@ -22,12 +21,9 @@ public class MilitaryAirport extends Airport {
     }
 
     @Override
-    public boolean receive(Vehicle vehicle) {
+    public void receive(Vehicle vehicle) {
         if (vehicle instanceof Military) {
-            return super.receive(vehicle);
-        } else {
-            Main.logger.log(Logger.VERBOSE, String.format("%s denied %s: only military vehicles are permitted", this, vehicle));
-            return false;
+            super.receive(vehicle);
         }
     }
 

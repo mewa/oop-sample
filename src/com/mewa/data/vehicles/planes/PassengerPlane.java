@@ -1,21 +1,19 @@
 package com.mewa.data.vehicles.planes;
 
 import com.mewa.data.passengers.Passenger;
-import com.mewa.data.type.Civil;
+import com.mewa.data.type.CivilVehicle;
 import com.mewa.ui.controllers.GUIMain;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by Mewa on 2015-10-10.
  */
-public class PassengerPlane extends Plane implements Civil {
+public class PassengerPlane extends Plane implements CivilVehicle {
     private int mCapacity;
 
     private final List<Passenger> mPassengers = Collections.synchronizedList(new ArrayList<Passenger>());
@@ -36,15 +34,31 @@ public class PassengerPlane extends Plane implements Civil {
     }
 
     @Override
+    public Collection<Passenger> getPassengers() {
+        return mPassengers;
+    }
+
+    @Override
     public synchronized boolean board(Passenger passenger) {
         if (canBoard()) {
-            mPassengers.add(passenger);
+            synchronized (mPassengers) {
+                mPassengers.add(passenger);
+            }
+            update();
             return true;
         }
         return false;
     }
 
-    protected boolean canBoard() {
+    @Override
+    public void clearPassengers() {
+        synchronized (mPassengers) {
+            mPassengers.clear();
+        }
+        update();
+    }
+
+    public boolean canBoard() {
         return mPassengers.size() < getCapacity();
     }
 

@@ -3,27 +3,30 @@ package com.mewa.ui.controllers;
 import com.mewa.data.GameObject;
 import com.mewa.data.GameObjectUpdateListener;
 import com.mewa.data.Localizable;
-import com.mewa.data.location.Location;
 import com.mewa.data.location.Route;
+import com.mewa.data.location.World;
+import com.mewa.data.passengers.Passenger;
 import com.mewa.data.ports.*;
 import com.mewa.data.type.Civil;
+import com.mewa.data.type.CivilVehicle;
 import com.mewa.data.type.Military;
 import com.mewa.data.vehicles.Vehicle;
+import com.mewa.data.vehicles.planes.MilitaryPlane;
 import com.mewa.data.vehicles.planes.PassengerPlane;
 import com.mewa.data.vehicles.planes.Plane;
 import com.mewa.data.vehicles.ships.AircraftCarrier;
 import com.mewa.data.vehicles.ships.CruiseShip;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
+import javafx.util.Callback;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.*;
 
 /**
  * Created by Mewa on 2015-12-19.
@@ -59,7 +62,7 @@ public class InfoPane {
                         new Thread() {
                             @Override
                             public void run() {
-                                PassengerPlane plane = new PassengerPlane(10);
+                                PassengerPlane plane = new PassengerPlane((int) (30 + Math.random() * 200));
                                 civilAirport.depart(plane);
                             }
                         }.start();
@@ -75,7 +78,7 @@ public class InfoPane {
                         new Thread() {
                             @Override
                             public void run() {
-                                CruiseShip cs = new CruiseShip(1234);
+                                CruiseShip cs = new CruiseShip((int) (300 + Math.random() * 2000));
                                 navalPort.depart(cs);
                             }
                         }.start();
@@ -95,6 +98,36 @@ public class InfoPane {
                     }
                 });
             }
+        }
+        final ListView<Passenger> listView;
+        if (port instanceof Civil) {
+            final Civil civil = (Civil) port;
+            addRow("numPassengers", civil.getNumberOfPassengers() + "");
+            listView = getPassengerListView(civil);
+
+            port.setGameObjectListener(new GameObjectUpdateListener() {
+                                           @Override
+                                           public void onGameObjectUpdated(final GameObject gameObject) {
+                                               final ObservableList<Passenger> passengers;
+                                               synchronized (civil.getPassengers()) {
+                                                   passengers = FXCollections.observableArrayList(civil.getPassengers());
+                                               }
+                                               Platform.runLater(new Runnable() {
+                                                   @Override
+                                                   public void run() {
+                                                       if (listView != null) {
+                                                           synchronized (listView) {
+                                                               listView.setItems(passengers);
+                                                           }
+                                                       }
+                                                       if (gameObject instanceof Civil) {
+                                                           propertyMap.get("numPassengers").setText(((Civil) gameObject).getNumberOfPassengers() + "");
+                                                       }
+                                                   }
+                                               });
+                                           }
+                                       }
+            );
         }
     }
 
@@ -131,15 +164,34 @@ public class InfoPane {
         addRow("Next stop", vehicle.getRoute().getNextStop(vehicle) + "");
         addRow("Direction", vehicle.getDirection() + "");
         if (vehicle instanceof Plane) {
-            Plane plane = (Plane) vehicle;
+            final Plane plane = (Plane) vehicle;
             addRow("Fuel", plane.getFuel() + "");
+            addButton("Awaryjne lądowanie", new OnClickListener() {
+                @Override
+                public void onClick() {
+                    if (plane instanceof CivilVehicle) {
+                        PassengerPlane civilVehicle = (PassengerPlane) plane;
+                        AbstractPort emergencyAirport = World.getInstance().getClosestCivilAirport(civilVehicle);
+                        Route route = new Route(null, emergencyAirport);
+                        route.add(plane);
+                        route.add(emergencyAirport);
+                        civilVehicle.setRoute(route, 1);
+                    } else if (plane instanceof Military) {
+                        MilitaryPlane militaryPlane = (MilitaryPlane) plane;
+                    }
+                }
+            });
         }
-        if (vehicle instanceof Civil) {
-            Civil civil = (Civil) vehicle;
+        final ListView<Passenger> listView;
+        if (vehicle instanceof CivilVehicle) {
+            CivilVehicle civil = (CivilVehicle) vehicle;
             addRow("Capacity", civil.getCapacity() + "");
             addRow("numPassengers", civil.getNumberOfPassengers() + "");
+            listView = getPassengerListView(civil);
+        } else {
+            listView = null;
         }
-        vehicle.setLocationUpdateListener(new GameObjectUpdateListener() {
+        vehicle.setGameObjectListener(new GameObjectUpdateListener() {
             @Override
             public void onGameObjectUpdated(final GameObject gameObject) {
                 Platform.runLater(new Runnable() {
@@ -157,18 +209,58 @@ public class InfoPane {
                                 Plane plane = (Plane) gameObject;
                                 propertyMap.get("Fuel").setText(String.format("%.3f", plane.getFuel()));
                             }
-                            if (gameObject instanceof Civil) {
-                                Civil civil = (Civil) gameObject;
+                            if (gameObject instanceof CivilVehicle) {
+                                CivilVehicle civil = (CivilVehicle) gameObject;
                                 propertyMap.get("Capacity").setText("" + civil.getCapacity());
                                 propertyMap.get("numPassengers").setText("" + civil.getNumberOfPassengers());
+                                if (listView != null) {
+                                    synchronized (listView) {
+                                        listView.setItems(FXCollections.observableArrayList(civil.getPassengers()));
+                                    }
+                                }
                             }
                         } else {
-                            vehicle.setLocationUpdateListener(null);
+                            vehicle.setGameObjectListener(null);
                         }
                     }
                 });
             }
         });
+    }
+
+    public ListView<Passenger> getPassengerListView(Civil civil) {
+        final ListView<Passenger> passengerListView = new ListView<Passenger>();
+        passengerListView.setMinWidth(450);
+        passengerListView.setItems(FXCollections.<Passenger>observableArrayList(civil.getPassengers()));
+        passengerListView.setCellFactory(new Callback<ListView<Passenger>, ListCell<Passenger>>() {
+            @Override
+            public ListCell<Passenger> call(ListView<Passenger> param) {
+                final ListCell<Passenger> cell = new ListCell<Passenger>() {
+                    @Override
+                    protected void updateItem(Passenger item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (empty) {
+                            setText("");
+                        } else {
+                            setText(item.getFirstName() + " " + item.getLastName() + " [" + item.getId() + "]" + " | "
+                                            + (item.getTrip() != null ? item.getTrip().getNextRoute().getKey().getOrigin(item.getTrip().getNextRoute().getValue())
+                                            + " -> "
+                                            + item.getTrip().getNextRoute().getKey().getDestination(item.getTrip().getNextRoute().getValue()) : null)
+                            );
+                        }
+                    }
+                };
+                return cell;
+            }
+        });
+        passengerListView.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                System.out.println(passengerListView.getSelectionModel().getSelectedItem());
+            }
+        });
+        main.getChildren().add(passengerListView);
+        return passengerListView;
     }
 
     public interface OnClickListener {

@@ -9,7 +9,7 @@
 <TitledPane fx:id="root" animated="false" prefHeight="100.0" text="port" xmlns:fx="http://javafx.com/fxml/1"
             xmlns="http://javafx.com/javafx/2.2" fx:controller="com.mewa.ui.controllers.InfoPane">
     <content>
-        <AnchorPane prefHeight="200.0" prefWidth="200.0">
+        <AnchorPane prefHeight="200.0">
             <children>
                 <VBox fx:id="main" layoutX="0.0" layoutY="0.0">
                     <HBox>

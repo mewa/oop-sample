@@ -1,19 +1,10 @@
 package com.mewa.data.ports;
 
-import com.mewa.Main;
-import com.mewa.data.location.Location;
-import com.mewa.data.location.World;
-import com.mewa.data.type.Airborne;
 import com.mewa.data.vehicles.Vehicle;
-import com.mewa.data.vehicles.planes.Plane;
-import com.mewa.ui.Drawable;
 import com.mewa.ui.controllers.GUIMain;
-import com.mewa.utils.i.Logger;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
-import java.util.List;
-import java.util.ListIterator;
 import java.util.concurrent.Semaphore;
 
 /**
@@ -30,13 +21,13 @@ public class Airport extends AbstractPort {
     }
 
     @Override
-    public boolean receive(Vehicle vehicle) {
+    public void receive(Vehicle vehicle) {
         try {
             capacitySemaphore.acquire();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        return super.receive(vehicle);
+        super.receive(vehicle);
     }
 
     @Override
@@ -56,6 +47,7 @@ public class Airport extends AbstractPort {
                 getLocation().getY() * GUIMain.CELL_SIZE + inset * GUIMain.CELL_SIZE,
                 (1 - 2 * inset) * GUIMain.CELL_SIZE,
                 (1 - 2 * inset) * GUIMain.CELL_SIZE);
+        super.draw(gc);
     }
 
     public int getCapacity() {

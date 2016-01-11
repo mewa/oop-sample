@@ -13,12 +13,9 @@ import javafx.scene.paint.Color;
  */
 public class NavalPort extends AbstractPort {
     @Override
-    public boolean receive(Vehicle vehicle) {
+    public void receive(Vehicle vehicle) {
         if (vehicle instanceof Naval) {
-            return super.receive(vehicle);
-        } else {
-            Main.logger.log(Logger.VERBOSE, String.format("%s denied %s: only watercrafts are permitted", this, vehicle));
-            return false;
+            super.receive(vehicle);
         }
     }
 
@@ -30,5 +27,6 @@ public class NavalPort extends AbstractPort {
                 getLocation().getY() * GUIMain.CELL_SIZE + inset * GUIMain.CELL_SIZE,
                 (1 - 2 * inset) * GUIMain.CELL_SIZE,
                 (1 - 2 * inset) * GUIMain.CELL_SIZE);
+        super.draw(gc);
     }
 }
