@@ -14,6 +14,9 @@ import javafx.application.Platform;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.Semaphore;
@@ -22,7 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Created by Mewa on 2015-10-12.
  */
-public class World implements Serializable{
+public class World implements Serializable {
     private static World instance;
     private static final int kWidth = 25;
     private static final int kHeight = 25;
@@ -221,7 +224,20 @@ public class World implements Serializable{
             e.printStackTrace();
         }
         if (instance == null) {
-            instance = new World();
+            ObjectInputStream ois;
+            try {
+                ois = new ObjectInputStream(new FileInputStream("world.save"));
+                try {
+                    instance = (World) ois.readObject();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (instance == null) {
+                instance = new World();
+            }
         }
         mWorldLock.release();
         return instance;

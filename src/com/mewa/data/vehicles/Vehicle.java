@@ -9,29 +9,26 @@ import com.mewa.data.location.World;
 import com.mewa.ui.Drawable;
 import com.mewa.ui.controllers.GUIMain;
 import com.mewa.utils.i.Logger;
+import javafx.application.Platform;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by Mewa on 2015-10-10.
  */
-public abstract class Vehicle extends GameObject implements Drawable, Comparable<Vehicle> {
+public abstract class Vehicle extends GameObject implements Drawable, Comparable<Vehicle>, Serializable {
     private static AtomicInteger idGenerator = new AtomicInteger();
 
     private int mId = idGenerator.getAndIncrement();
     private Route mRoute;
-    private Thread mVehicleThread;
-    private int mLocationsTraversed = 0;
-    private int direction;
-    private final int[] mRouteLock = new int[0];
+    private transient Thread mVehicleThread = getVehicleThread();
 
-    public Vehicle() {
-        this(null);
-    }
-
-    public Vehicle(Route route) {
-        mRoute = route;
-        mVehicleThread = new Thread("vehicle-thread-" + this) {
+    private Thread getVehicleThread() {
+        return new Thread("vehicle-thread-" + this) {
             @Override
             public void run() {
                 while (true) {
@@ -71,6 +68,36 @@ public abstract class Vehicle extends GameObject implements Drawable, Comparable
                 }
             }
         };
+    }
+
+    private int mLocationsTraversed = 0;
+    private int direction;
+    private final int[] mRouteLock = new int[0];
+
+    public Vehicle() {
+        this(null);
+    }
+
+    public Vehicle(Route route) {
+        mRoute = route;
+        start();
+    }
+
+    private void readObject(final ObjectInputStream stream) throws IOException, ClassNotFoundException {
+        stream.defaultReadObject();
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                World.getInstance();
+                start();
+            }
+        });
+    }
+
+    public void start() {
+        if (mVehicleThread == null) {
+            mVehicleThread = getVehicleThread();
+        }
         mVehicleThread.setDaemon(true);
         mVehicleThread.start();
     }

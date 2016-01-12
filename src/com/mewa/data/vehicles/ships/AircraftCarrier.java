@@ -14,6 +14,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.util.Pair;
 
 import java.util.Map;
 
@@ -47,7 +48,7 @@ public class AircraftCarrier extends Ship implements Military, HasPort {
                     int pos = (int) (Math.random() * (World.getInstance().getMilitaryAirports().size() - 1));
                     MilitaryPlane militaryPlane = new MilitaryPlane();
                     militaryPlane.setLocation(new Location(getLocation().getX(), getLocation().getY()));
-                    Map.Entry<Route, Integer> r = World.getInstance().getMilitaryAirports().get(pos).getRandomRoute();
+                    Pair<Route, Integer> r = World.getInstance().getMilitaryAirports().get(pos).getRandomRoute();
                     militaryPlane.setRoute(r.getKey(), r.getValue());
 
                     double dx, dy;

@@ -11,7 +11,9 @@ import com.mewa.ui.controllers.GUIMain;
 import com.mewa.utils.i.Logger;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import javafx.util.Pair;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -66,14 +68,14 @@ public abstract class AbstractPort extends GameObject implements HasPort, Drawab
         }
         World.getInstance().registerGameObject(vehicle);
         vehicle.setLocation(new Location(getLocation()));
-        Map.Entry<Route, Integer> item = getRandomRoute();
+        Pair<Route, Integer> item = getRandomRoute();
         vehicle.setRoute(item.getKey(), item.getValue());
         Main.logger.log(Logger.ERROR, vehicle + " departed from " + this);
         update();
         return wasInPort;
     }
 
-    public Map.Entry<Route, Integer> getRandomRoute() {
+    public Pair<Route, Integer> getRandomRoute() {
         synchronized (mRoutes) {
             Set<Map.Entry<Route, Integer>> next = mRoutes.entrySet();
             int pos = Math.min((int) (Math.random() * next.size()), next.size());
@@ -86,7 +88,7 @@ public abstract class AbstractPort extends GameObject implements HasPort, Drawab
                     break;
                 }
             }
-            return item;
+            return new Pair<Route, Integer>(item.getKey(), item.getValue());
         }
     }
 

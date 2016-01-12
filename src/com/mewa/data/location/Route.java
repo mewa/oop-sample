@@ -11,13 +11,14 @@ import com.mewa.utils.i.Logger;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by Mewa on 2015-10-10.
  */
-public class Route extends GameObject implements Drawable {
+public class Route extends GameObject implements Drawable, Serializable {
     private final List<Localizable> locations = Collections.synchronizedList(new ArrayList<Localizable>());
     private final AbstractPort origin;
     private final AbstractPort destination;

@@ -23,7 +23,9 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 
 /**
  * Created by Mewa on 2015-12-06.
@@ -31,24 +33,24 @@ import java.io.IOException;
 public class GUIMain {
     public static final int CELL_SIZE = 30;
 
-    public static Logger logger = new DebugLogger(new StandardOutput(), new SerialClock());
+    public transient static Logger logger = new DebugLogger(new StandardOutput(), new SerialClock());
 
-    private Parent parent;
-    private Scene scene;
+    private transient Parent parent;
+    private transient Scene scene;
 
     @FXML
-    public Canvas worldCanvas;
+    public transient Canvas worldCanvas;
     @FXML
-    public Canvas vehicleCanvas;
+    public transient Canvas vehicleCanvas;
     @FXML
-    public AnchorPane root;
+    public transient AnchorPane root;
 
-    private GraphicsContext worldGraphicsContext;
-    private GraphicsContext objectGraphicsContext;
+    private transient GraphicsContext worldGraphicsContext;
+    private transient GraphicsContext objectGraphicsContext;
     private World world;
-    private Scene portScene;
-    private Stage infoStage;
-    private Stage mainStage;
+    private transient Scene portScene;
+    private transient Stage infoStage;
+    private transient Stage mainStage;
 
     public GUIMain() throws IOException {
         logger.setLogLevel(Logger.WARN);
@@ -62,6 +64,21 @@ public class GUIMain {
         mainStage.setOnHiding(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent event) {
+                ObjectOutputStream oos = null;
+                try {
+                    oos = new ObjectOutputStream(new FileOutputStream("world.save"));
+                    oos.writeObject(World.getInstance());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    if (oos != null) {
+                        try {
+                            oos.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
                 System.exit(0);
             }
         });
@@ -98,14 +115,14 @@ public class GUIMain {
         logger.log(Logger.VERBOSE, "clickLocation: %s", clickLocation);
         if (event.getButton().equals(MouseButton.PRIMARY)) {
             for (AbstractPort port : world.getPorts()) {
-                if (world.collides(port.getLocation(), clickLocation)) {
+                if (world.collides(port.getLocation(), clickLocation, 0.4)) {
                     logger.log(Logger.VERBOSE, "Port clicked: %s", port);
                     port.onClick(this);
                     return;
                 }
             }
             for (Vehicle vehicle : world.getVehicles()) {
-                if (world.collides(vehicle.getLocation(), clickLocation)) {
+                if (world.collides(vehicle.getLocation(), clickLocation, 0.6)) {
                     logger.log(Logger.VERBOSE, "Vehicle clicked: %s", vehicle);
                     vehicle.onClick(this);
                     return;
@@ -161,6 +178,7 @@ public class GUIMain {
             e.printStackTrace();
         }
     }
+
     public void showVehiclePanel(Vehicle route) {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("port_info.fxml"));
         try {

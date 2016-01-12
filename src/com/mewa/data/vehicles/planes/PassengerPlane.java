@@ -8,12 +8,13 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
  * Created by Mewa on 2015-10-10.
  */
-public class PassengerPlane extends Plane implements CivilVehicle {
+public class PassengerPlane extends Plane implements CivilVehicle, Serializable {
     private int mCapacity;
 
     private final List<Passenger> mPassengers = Collections.synchronizedList(new ArrayList<Passenger>());

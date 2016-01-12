@@ -3,12 +3,14 @@ package com.mewa.data;
 import com.mewa.data.location.Location;
 import com.mewa.ui.controllers.GUIMain;
 
+import java.io.Serializable;
+
 /**
  * Created by Mewa on 2015-12-19.
  */
-public abstract class GameObject implements Localizable {
+public abstract class GameObject implements Localizable, Serializable {
     private Location mLocation;
-    private GameObjectUpdateListener listener;
+    private transient GameObjectUpdateListener listener;
 
     public void setLocation(Location location) {
         this.mLocation = location;

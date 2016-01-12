@@ -10,13 +10,14 @@ import com.mewa.ui.Drawable;
 import com.mewa.utils.i.Logger;
 import javafx.scene.canvas.GraphicsContext;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
 
 /**
  * Created by Mewa on 2015-10-10.
  */
-public class Location implements Comparable<Location>, Drawable, Localizable {
+public class Location implements Comparable<Location>, Drawable, Localizable, Serializable {
     private double mX;
     private double mY;
 

@@ -26,24 +26,25 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
  * Created by Mewa on 2015-12-19.
  */
-public class InfoPane {
+public class InfoPane implements Serializable {
     @FXML
-    private VBox main;
+    private transient VBox main;
     @FXML
-    private TitledPane root;
+    private transient TitledPane root;
     @FXML
-    private VBox properties;
+    private transient VBox properties;
     @FXML
-    private VBox values;
+    private transient VBox values;
 
-    private Map<String, Label> propertyMap = Collections.synchronizedMap(new WeakHashMap<String, Label>());
+    private transient Map<String, Label> propertyMap = Collections.synchronizedMap(new WeakHashMap<String, Label>());
 
-    private static Object currentObject;
+    private transient static Object currentObject;
 
     public InfoPane() {
     }

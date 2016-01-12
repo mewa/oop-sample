@@ -12,6 +12,9 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -80,6 +83,14 @@ public class Crossing extends GameObject implements Drawable {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    private void readObject(final ObjectInputStream stream) throws IOException, ClassNotFoundException {
+        stream.defaultReadObject();
+        mAirLock.drainPermits();
+        mWaterLock.drainPermits();
+        mWaterLock.release();
+        mAirLock.release();
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.mewa.data.passengers;
 import com.mewa.data.Localizable;
 import com.mewa.data.ports.AbstractPort;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -12,7 +13,7 @@ import java.util.stream.IntStream;
 /**
  * Created by Mewa on 2015-10-10.
  */
-public class Passenger {
+public class Passenger implements Serializable {
     private static List<String> kNames = new ArrayList<String>() {{
         add("Arya");
         add("Stannis");
