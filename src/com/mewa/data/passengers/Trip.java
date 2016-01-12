@@ -10,6 +10,8 @@ import java.util.*;
  */
 public class Trip {
 
+    private final Passenger mPassenger;
+
     public enum Type {
         LEISURE,
         WORK
@@ -32,7 +34,8 @@ public class Trip {
         }
     };
 
-    public Trip(AbstractPort home, Type type) {
+    public Trip(AbstractPort home, Type type, Passenger passenger) {
+        mPassenger = passenger;
         mHome = home;
         mType = type;
         add(mHome.getRandomRoute());
@@ -42,7 +45,7 @@ public class Trip {
             Map.Entry<Route, Integer> randomRoute;
             randomRoute = route.getKey().getDestination(route.getValue()).getRandomRoute();
             add(randomRoute);
-        } while (mRoutes.get(mRoutes.size() - 1).getKey().getDestination(route.getValue()) != mHome);
+        } while (mRoutes.get(mRoutes.size() - 1).getKey().getDestination(mRoutes.get(mRoutes.size() - 1).getValue()) != mHome);
     }
 
     private void add(Map.Entry<Route, Integer> route) {
@@ -68,22 +71,28 @@ public class Trip {
     /**
      * @return zwraca następną trasę z jakiej ma się składać podróż
      */
-    public Map.Entry<Route, Integer> getNextRoute() {
+    public synchronized Map.Entry<Route, Integer> getNextRoute() {
         return mRoutes.get(mPosition);
     }
 
     /**
      * ruszaj w trasę
      */
-    public void advance() {
-        ++mPosition;
+    public synchronized void advance() {
+        mPassenger.setLocation(
+                mRoutes.get(mPosition).getKey().getDestination(
+                        mRoutes.get(mPosition++).getValue()
+                )
+        );
+        if (isFinished()) {
+            mPassenger.onTripFinished();
+        }
     }
 
     /**
-     *
      * @return czy koneic podrozy
      */
     public boolean isFinished() {
-        return mPosition == mRoutes.size();
+        return mPosition >= mRoutes.size();
     }
 }

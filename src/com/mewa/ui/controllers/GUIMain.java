@@ -51,7 +51,7 @@ public class GUIMain {
     private Stage mainStage;
 
     public GUIMain() throws IOException {
-        logger.setLogLevel(Logger.VERBOSE);
+        logger.setLogLevel(Logger.WARN);
         FXMLLoader loader = new FXMLLoader(getClass().getResource("main.fxml"));
         loader.setController(this);
         scene = new Scene((Parent) loader.load());

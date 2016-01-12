@@ -1,16 +1,9 @@
 package com.mewa.data.passengers;
 
-import com.mewa.Main;
 import com.mewa.data.Localizable;
-import com.mewa.data.location.Location;
 import com.mewa.data.ports.AbstractPort;
-import com.mewa.data.ports.CivilAirport;
-import com.mewa.data.type.Civil;
-import com.mewa.data.vehicles.Vehicle;
-import com.mewa.utils.i.Logger;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.function.IntConsumer;
@@ -89,14 +82,13 @@ public class Passenger {
                 time = (long) (2000 + Math.random() * 500);
             }
             try {
-                mTrip = null;
                 isSleeping = true;
-                Thread.sleep(time);
+                if (false) Thread.sleep(time);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
             isSleeping = false;
-            mTrip = new Trip(getHomeLocation(), Math.random() > 0.5 ? Trip.Type.LEISURE : Trip.Type.WORK);
+                mTrip = new Trip(getHomeLocation(), Math.random() > 0.5 ? Trip.Type.LEISURE : Trip.Type.WORK, this);
         }
     }
 
@@ -164,8 +156,10 @@ public class Passenger {
     }
 
     public void setHomeLocation(AbstractPort homeLocation) {
-        this.mHomeLocation = homeLocation;
-        mTrip = new Trip(getHomeLocation(), Math.random() > 0.5 ? Trip.Type.LEISURE : Trip.Type.WORK);
+        synchronized (this) {
+            this.mHomeLocation = homeLocation;
+        }
+        mTrip = new Trip(getHomeLocation(), Math.random() > 0.5 ? Trip.Type.LEISURE : Trip.Type.WORK, this);
     }
 
     public Trip getTrip() {
@@ -174,10 +168,20 @@ public class Passenger {
 
     @Override
     public String toString() {
-        return String.format("%s %s, lat %d, PIESEŁ[%s], zamieszkały w %s", getFirstName(), getLastName(), getAge(), getId(), getHomeLocation());
+        return String.format("%s %s, lat %d, PIESEŁ[%s], zamieszkały w %s, w trasie z %s do %s",
+                getFirstName(), getLastName(), getAge(), getId(), getHomeLocation(),
+                getTrip() != null && !getTrip().isFinished() ? getTrip().getNextRoute().getKey().getOrigin(getTrip().getNextRoute().getValue()) : null,
+                getTrip() != null && !getTrip().isFinished() ? getTrip().getNextRoute().getKey().getDestination(getTrip().getNextRoute().getValue()) : null
+        );
     }
 
     public synchronized void setLocation(AbstractPort location) {
-        this.mLocation = location;
+        synchronized (this) {
+            this.mLocation = location;
+        }
+    }
+
+    public synchronized void onTripFinished() {
+        mTrip = new Trip(getHomeLocation(), Math.random() > 0.5 ? Trip.Type.LEISURE : Trip.Type.WORK, this);
     }
 }

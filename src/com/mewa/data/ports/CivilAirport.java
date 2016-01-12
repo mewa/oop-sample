@@ -34,7 +34,7 @@ public class CivilAirport extends Airport implements Civil {
                 synchronized (mPassengers) {
                     for (ListIterator<Passenger> it = mPassengers.listIterator(); it.hasNext(); ) {
                         Passenger passenger = it.next();
-                        if (!passenger.isSleeping() && passenger.getTrip() != null &&
+                        if (!passenger.isSleeping() && passenger.getTrip() != null && !passenger.getTrip().isFinished() &&
                                 passenger.getTrip().getNextRoute().getKey().getDestination(passenger.getTrip().getNextRoute().getValue())
                                         == vehicle.getRoute().getDestination(vehicle.getDirection())) {
                             if (passengerPlane.board(passenger)) {
@@ -60,6 +60,9 @@ public class CivilAirport extends Airport implements Civil {
         super.receive(vehicle);
         if (vehicle instanceof CivilVehicle) {
             CivilVehicle civilVehicle = (CivilVehicle) vehicle;
+            for (Passenger passenger : civilVehicle.getPassengers()) {
+                passenger.getTrip().advance();
+            }
             addPassengers(civilVehicle.getPassengers());
             civilVehicle.clearPassengers();
         }
@@ -74,10 +77,6 @@ public class CivilAirport extends Airport implements Civil {
     private void addPassenger(Passenger passenger) {
         synchronized (mPassengers) {
             mPassengers.add(passenger);
-            synchronized (passenger) {
-                passenger.setLocation(this);
-                passenger.getTrip().advance();
-            }
         }
         update();
     }

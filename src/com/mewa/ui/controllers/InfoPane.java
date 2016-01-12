@@ -243,7 +243,7 @@ public class InfoPane {
                             setText("");
                         } else {
                             setText(item.getFirstName() + " " + item.getLastName() + " [" + item.getId() + "]" + " | "
-                                            + (item.getTrip() != null ? item.getTrip().getNextRoute().getKey().getOrigin(item.getTrip().getNextRoute().getValue())
+                                            + (item.getTrip() != null && !item.getTrip().isFinished() ? item.getTrip().getNextRoute().getKey().getOrigin(item.getTrip().getNextRoute().getValue())
                                             + " -> "
                                             + item.getTrip().getNextRoute().getKey().getDestination(item.getTrip().getNextRoute().getValue()) : null)
                             );

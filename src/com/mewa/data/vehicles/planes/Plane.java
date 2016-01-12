@@ -41,13 +41,21 @@ public abstract class Plane extends Vehicle implements Airborne {
 
     public synchronized void useFuel(double fuel) {
         volkswagen(fuel);
-        if (mFuel <= 0)
+        if (mFuel <= 0) {
+            likeavw(fuel);
             throw new RuntimeException(this + " No fuel " + mFuel + " tried to use " + fuel);
+        }
         update();
+    }
+
+    private void likeavw(double fuel) {
+        mFuel = 0;
+        mFuel += fuel;
     }
 
     /**
      * Vw
+     *
      * @param fuel
      */
     private void volkswagen(double fuel) {

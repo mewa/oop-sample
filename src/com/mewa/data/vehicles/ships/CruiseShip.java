@@ -57,7 +57,7 @@ public class CruiseShip extends Ship implements CivilVehicle {
         update();
     }
 
-    private boolean canBoard() {
+    public boolean canBoard() {
         return mPassengers.size() < getCapacity();
     }
 
