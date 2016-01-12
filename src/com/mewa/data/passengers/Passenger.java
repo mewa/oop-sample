@@ -49,6 +49,10 @@ public class Passenger implements Serializable {
     private Localizable mLocation;
     private boolean isSleeping = false;
 
+    /**
+     * tworzy pasazera z domem w home
+     * @param home
+     */
     public Passenger(AbstractPort home) {
         mFirstName = kNames.get((int) (Math.random() * (kNames.size()) - 1));
         mLastName = kSurnames.get((int) (Math.random() * (kSurnames.size()) - 1));
@@ -83,8 +87,7 @@ public class Passenger implements Serializable {
                 time = (long) (2000 + Math.random() * 500);
             }
             try {
-                isSleeping = true;
-                if (false) Thread.sleep(time);
+                Thread.sleep(time);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -102,6 +105,10 @@ public class Passenger implements Serializable {
         return true;
     }
 
+    /**
+     * zwraca czy pasazer spi
+     * @return
+     */
     public boolean isSleeping() {
         return isSleeping;
     }

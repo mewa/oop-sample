@@ -41,6 +41,10 @@ public class Crossing extends GameObject implements Drawable {
 
     List<Vehicle> vehicles = Collections.synchronizedList(new ArrayList<Vehicle>());
 
+    /**
+     * Sprawdza czy pojazd moze wjechac na skrzyzowanie
+     * @param vehicle
+     */
     public void accept(final Vehicle vehicle) {
         try {
             if (vehicle instanceof Airborne) {

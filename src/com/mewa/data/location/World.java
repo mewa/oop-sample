@@ -53,6 +53,9 @@ public class World implements Serializable {
         create();
     }
 
+    /**
+     * tworzy swiat
+     */
     private void create() {
         Main.logger.log(Logger.VERBOSE,
                 String.format(
@@ -74,14 +77,26 @@ public class World implements Serializable {
         spawnRoutes(mCivilAirports);
     }
 
+    /**
+     *
+     * @return szerokosc swiata
+     */
     public double getWidth() {
         return mNortheast.getX() - mSouthwest.getX();
     }
 
+    /**
+     *
+     * @return wysokosc swiata
+     */
     public double getHeight() {
         return mNortheast.getY() - mSouthwest.getY();
     }
 
+    /**
+     * tworzy trasy
+     * @param ports
+     */
     private void spawnRoutes(List<AbstractPort> ports) {
         for (int i = 0; i < ports.size() - 1; ++i) {
             AbstractPort port = ports.get(i);
@@ -101,6 +116,12 @@ public class World implements Serializable {
         }
     }
 
+    /**
+     * funkcja pomocnicza tworzaca trase
+     * @param route
+     * @param location1
+     * @param location2
+     */
     private void makeRoute(Route route, AbstractPort location1, AbstractPort location2) {
         route.add(location1);
         route.add(closestCrossing(location1.getLocation(), location2.getLocation()));
@@ -108,6 +129,12 @@ public class World implements Serializable {
         registerGameObject(route);
     }
 
+    /**
+     *
+     * @param location1
+     * @param location2
+     * @return najblizsze skrzyzowanie
+     */
     private Localizable closestCrossing(Location location1, Location location2) {
         double distance = location1.distanceTo(mCrossings.get(0).getLocation()) + location2.distanceTo(mCrossings.get(0).getLocation());
         Crossing closest = mCrossings.get(0);
@@ -121,6 +148,9 @@ public class World implements Serializable {
         return closest;
     }
 
+    /**
+     * tworzy porty
+     */
     private void spawnPorts() {
         while (mMilitaryAirports.size() < 3 || mCivilAirports.size() < 5 || mCivilNavalPorts.size() + mMilitaryNavalPorts.size() < 5) {
             AbstractPort port;
@@ -148,6 +178,10 @@ public class World implements Serializable {
         }
     }
 
+    /**
+     * test!
+     * tworzy pojazdy
+     */
     private void spawnVehicles() {
         while (mNumVehicles < 20) {
             Vehicle vehicle;
@@ -167,10 +201,21 @@ public class World implements Serializable {
         }
     }
 
+    /**
+     * ustawia obiekt na mapie
+     * @param world
+     * @param gameObject
+     */
     private static void spawnAtRandomLocation(World world, GameObject gameObject) {
         spawnAtRandomLocation(world, gameObject, 0.5);
     }
 
+    /**
+     * ustawia obiekt na mapie z wolna przestrzenia radius dookola
+     * @param world
+     * @param gameObject
+     * @param radius
+     */
     private static void spawnAtRandomLocation(World world, GameObject gameObject, double radius) {
         Location location = new Location();
         gameObject.setLocation(location);
@@ -186,10 +231,21 @@ public class World implements Serializable {
         Main.logger.log(Logger.VERBOSE, "Spawning " + gameObject + " @ " + gameObject.getLocation());
     }
 
+    /**
+     * sprawdza czy obiekt koliduje z obiektami w swiecie
+     * @param gameObject1
+     * @return
+     */
     private boolean collides(GameObject gameObject1) {
         return collides(gameObject1, 0.5);
     }
 
+    /**
+     * sprawdza czy obiekt koliduje z obiektami w swiecie w promieniu radius
+     * @param gameObject1
+     * @param radius
+     * @return
+     */
     private boolean collides(GameObject gameObject1, double radius) {
         synchronized (mGameObjects) {
             for (GameObject gameObject2 : mGameObjects) {
@@ -202,10 +258,23 @@ public class World implements Serializable {
         return false;
     }
 
+    /**
+     * sprawdza czy lokacje koliduja ze soba
+     * @param localizable1
+     * @param localizable2
+     * @return
+     */
     public boolean collides(Localizable localizable1, Localizable localizable2) {
         return collides(localizable1, localizable2, 0.5);
     }
 
+    /**
+     * sprawdza czy lokacje koliduja ze soba w zadanej odleglosci
+     * @param location1
+     * @param location2
+     * @param radius
+     * @return
+     */
     public boolean collides(Localizable location1, Localizable location2, double radius) {
         if (Math.abs(location1.getLocation().getX() - location2.getLocation().getX()) < radius
                 && Math.abs(location1.getLocation().getY() - location2.getLocation().getY()) < radius)
@@ -213,10 +282,19 @@ public class World implements Serializable {
         return false;
     }
 
+    /**
+     * przesun lokacje
+     * @param location
+     * @return
+     */
     private Location translateLocation(Location location) {
         return location;
     }
 
+    /**
+     * zwraca instancje swiata, inicjalizujac ja jesli nie istnieje
+     * @return
+     */
     public static World getInstance() {
         try {
             mWorldLock.acquire();
@@ -243,22 +321,46 @@ public class World implements Serializable {
         return instance;
     }
 
+    /**
+     * zwraca punkt poczatkowy swiata
+     * @return
+     */
     public Location getOrigin() {
         return mOrigin;
     }
 
+    /**
+     * zwraca polnocno-wschodni kraniec mapy
+     * @return
+     */
     public Location getNortheast() {
         return mNortheast;
     }
 
+    /**
+     * zwraca poludniowo-zachodni kraniec mapy
+     * @return
+     */
     public Location getSouthwest() {
         return mSouthwest;
     }
 
+    /**
+     * zwraca porty
+     * @return
+     */
     public List<AbstractPort> getPorts() {
         return mPorts;
     }
 
+    /**
+     * startuje GUI
+     * @param worldGC
+     * @param objectGC
+     * @param width
+     * @param height
+     * @param cellSize
+     */
     public void start(final GraphicsContext worldGC, final GraphicsContext objectGC, final double width, final double height, final double cellSize) {
         worldGC.setFill(Color.WHEAT);
         worldGC.fillRect(0, 0, width, height);
@@ -329,6 +431,10 @@ public class World implements Serializable {
         thread.start();
     }
 
+    /**
+     * rejestruje obiekt w swiecie do wykrywania kolizji
+     * @param gameObject
+     */
     public void registerGameObject(GameObject gameObject) {
         synchronized (mGameObjects) {
             mGameObjects.add(gameObject);
@@ -336,10 +442,18 @@ public class World implements Serializable {
         Main.logger.log(Logger.VERBOSE, "Registered " + gameObject + " @ " + gameObject.getLocation());
     }
 
+    /**
+     * zwraca trasy
+     * @return
+     */
     public List<Route> getRoutes() {
         return mRoutes;
     }
 
+    /**
+     * wyrejestrowuje obiekt ze swiata
+     * @param gameObject
+     */
     public void unregisterGameObject(GameObject gameObject) {
         synchronized (mGameObjects) {
             mGameObjects.remove(gameObject);
@@ -347,6 +461,10 @@ public class World implements Serializable {
         Main.logger.log(Logger.VERBOSE, "Unregistered " + gameObject + " @ " + gameObject.getLocation());
     }
 
+    /**
+     * zwraca pojazdy
+     * @return
+     */
     public List<Vehicle> getVehicles() {
         List<Vehicle> vehicles = new ArrayList<Vehicle>();
         for (GameObject gameObject : mGameObjects) {
@@ -357,16 +475,30 @@ public class World implements Serializable {
         return vehicles;
     }
 
+    /**
+     * zwraca wojskowe lotniska
+     * @return
+     */
     public List<AbstractPort> getMilitaryAirports() {
         return mMilitaryAirports;
     }
 
+    /**
+     * zwraca najbblisze cywilne lotnisko
+     * @param localizable
+     * @return
+     */
     public CivilAirport getClosestCivilAirport(Localizable localizable) {
         Collection<Localizable> collection = new ArrayList<Localizable>();
         collection.addAll(mCivilAirports);
         return (CivilAirport) localizable.getLocation().closest(collection);
     }
 
+    /**
+     * zwraca najblizsze wojskowe lotnisko
+     * @param localizable
+     * @return
+     */
     public MilitaryAirport getClosestMilitaryAirport(Localizable localizable) {
         Collection<Localizable> collection = new ArrayList<Localizable>();
         collection.addAll(mMilitaryAirports);

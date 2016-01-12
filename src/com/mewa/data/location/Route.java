@@ -37,6 +37,11 @@ public class Route extends GameObject implements Drawable, Serializable {
         return locations;
     }
 
+    /**
+     * poczatek trasy
+     * @param direction
+     * @return
+     */
     public AbstractPort getOrigin(int direction) {
         if (direction > 0)
             return origin;
@@ -44,6 +49,11 @@ public class Route extends GameObject implements Drawable, Serializable {
             return destination;
     }
 
+    /**
+     * cel trasy
+     * @param direction
+     * @return
+     */
     public AbstractPort getDestination(int direction) {
         if (direction > 0)
             return destination;
@@ -74,6 +84,11 @@ public class Route extends GameObject implements Drawable, Serializable {
         return "Route " + getOrigin(1) + "-" + getDestination(1);
     }
 
+    /**
+     * dodaje pojazd do trasy
+     * @param direction
+     * @param vehicle
+     */
     public void addVehicle(int direction, Vehicle vehicle) {
         synchronized (nextStopsMap) {
             if (direction == 1) {
@@ -90,6 +105,12 @@ public class Route extends GameObject implements Drawable, Serializable {
         }
     }
 
+    /**
+     * sprawdza czy pojazd koliduje z nastepnym na tej samej trasie, w tym samym kierunku
+     * @param vehicle
+     * @param direction
+     * @return
+     */
     public boolean collidesWithNext(Vehicle vehicle, int direction) {
         if (direction == 1) {
             synchronized (normalDirection) {
@@ -111,6 +132,11 @@ public class Route extends GameObject implements Drawable, Serializable {
         return false;
     }
 
+    /**
+     * usuwa pojazd z trasy
+     * @param direction
+     * @param vehicle
+     */
     public void removeVehicle(int direction, Vehicle vehicle) {
         if (direction == 1) {
             synchronized (normalDirection) {
@@ -123,6 +149,11 @@ public class Route extends GameObject implements Drawable, Serializable {
         }
     }
 
+    /**
+     * zwraca nastepny przystanek dla pojazdu
+     * @param vehicle
+     * @return
+     */
     public Localizable getNextStop(Vehicle vehicle) {
         synchronized (nextStopsMap) {
             boolean contains = nextStopsMap.containsKey(vehicle);
@@ -136,6 +167,12 @@ public class Route extends GameObject implements Drawable, Serializable {
         }
     }
 
+    /**
+     * przesuwa pojazd dalej na trasie
+     * @param vehicle
+     * @param direction
+     * @return
+     */
     public boolean incStop(Vehicle vehicle, int direction) {
         int pos;
         synchronized (nextStopsMap) {
@@ -150,7 +187,10 @@ public class Route extends GameObject implements Drawable, Serializable {
         }
     }
 
-
+    /**
+     * dodaje lokacje do trasy
+     * @param localizable
+     */
     public void add(Localizable localizable) {
         synchronized (locations) {
             locations.add(localizable);

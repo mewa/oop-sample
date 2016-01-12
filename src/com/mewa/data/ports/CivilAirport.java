@@ -68,12 +68,22 @@ public class CivilAirport extends Airport implements Civil {
         }
     }
 
+    /**
+     * dodaje pasazerow na lotnisko
+     *
+     * @param passengers
+     */
     private void addPassengers(Collection<Passenger> passengers) {
         for (Passenger passenger : passengers) {
             addPassenger(passenger);
         }
     }
 
+    /**
+     * dodaje pasazera na lotnisko
+     *
+     * @param passenger
+     */
     private void addPassenger(Passenger passenger) {
         synchronized (mPassengers) {
             mPassengers.add(passenger);

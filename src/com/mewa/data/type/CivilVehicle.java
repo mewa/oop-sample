@@ -19,5 +19,8 @@ public interface CivilVehicle extends Civil{
      */
     public boolean board(Passenger passenger);
 
+    /**
+     * czysci pojazd z pasazerow
+     */
     void clearPassengers();
 }

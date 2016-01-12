@@ -80,6 +80,11 @@ public class Location implements Comparable<Location>, Drawable, Localizable, Se
         return Double.compare(getY(), o.getY());
     }
 
+    /**
+     * zwraca najblizsza lokacje z przekazanej kolekcji
+     * @param locations
+     * @return
+     */
     public Localizable closest(Collection<Localizable> locations) {
         Iterator<Localizable> it = locations.iterator();
         Localizable closestLocation = it.next();
@@ -95,16 +100,13 @@ public class Location implements Comparable<Location>, Drawable, Localizable, Se
         return closestLocation;
     }
 
+    /**
+     *
+     * @param location
+     * @return dystans do lokacji
+     */
     public double distanceTo(Location location) {
         return Math.pow(Math.pow(getX() - location.getX(), 2) + Math.pow(getY() - location.getY(), 2), 0.5);
-    }
-
-    public void onVehicleArriving(Vehicle vehicle) {
-
-    }
-
-    public void onVehicleLeaving(Vehicle vehicle) {
-
     }
 
     @Override

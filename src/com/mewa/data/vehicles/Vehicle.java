@@ -102,6 +102,10 @@ public abstract class Vehicle extends GameObject implements Drawable, Comparable
         mVehicleThread.start();
     }
 
+    /**
+     * podrozuje do lokacji
+     * @param nextLocation
+     */
     protected abstract void travelTo(Localizable nextLocation);
 
     @Override
@@ -118,10 +122,19 @@ public abstract class Vehicle extends GameObject implements Drawable, Comparable
         guiMain.showVehiclePanel(this);
     }
 
+    /**
+     * zwraca trase
+     * @return
+     */
     public Route getRoute() {
         return mRoute;
     }
 
+    /**
+     * ustawia trase dla pojazdu
+     * @param route
+     * @param direction
+     */
     public void setRoute(Route route, int direction) {
         this.setDirection(direction);
         mLocationsTraversed = 0;
@@ -142,10 +155,18 @@ public abstract class Vehicle extends GameObject implements Drawable, Comparable
         }
     }
 
+    /**
+     * zwraca kierunek podrozy
+     * @return
+     */
     public int getDirection() {
         return direction;
     }
 
+    /**
+     * ustawia kierunek podrozy
+     * @param direction
+     */
     public void setDirection(int direction) {
         this.direction = direction;
     }

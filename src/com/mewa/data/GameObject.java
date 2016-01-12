@@ -17,6 +17,9 @@ public abstract class GameObject implements Localizable, Serializable {
         update();
     }
 
+    /**
+     * przekaz aktualizcje obiektu
+     */
     protected void update() {
         if (listener != null) {
             synchronized (listener) {
@@ -25,12 +28,21 @@ public abstract class GameObject implements Localizable, Serializable {
         }
     }
 
+    /**
+     * ustaw lokalizacje obiektu
+     * @param x wspolrzedna x
+     * @param y wspolrzedna y
+     */
     public void setLocation(double x, double y) {
         this.mLocation.setX(x);
         this.mLocation.setY(y);
         update();
     }
 
+    /**
+     * ustaw listenera
+     * @param gameObjectUpdateListener
+     */
     public void setGameObjectListener(GameObjectUpdateListener gameObjectUpdateListener) {
         listener = gameObjectUpdateListener;
     }

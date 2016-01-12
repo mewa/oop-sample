@@ -179,6 +179,11 @@ public class InfoPane implements Serializable {
                         civilVehicle.setRoute(route, 1);
                     } else if (plane instanceof Military) {
                         MilitaryPlane militaryPlane = (MilitaryPlane) plane;
+                        AbstractPort emergencyAirport = World.getInstance().getClosestMilitaryAirport(militaryPlane);
+                        Route route = new Route(null, emergencyAirport);
+                        route.add(plane);
+                        route.add(emergencyAirport);
+                        militaryPlane.setRoute(route, 1);
                     }
                 }
             });
